@@ -1,0 +1,22 @@
+{
+  "name": "batterie-in-barra",
+  "version": "1.0.0",
+  "description": "Mini batterie stile Apple vicino all'orologio di Windows",
+  "main": "main.js",
+  "author": "Simone",
+  "scripts": {
+    "start": "electron .",
+    "crea-exe": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^45.3.1",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "ch.simone.batterieinbarra",
+    "productName": "Batterie in Barra",
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

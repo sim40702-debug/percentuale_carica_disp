@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:">
+  <title>Batterie</title>
+  <link rel="stylesheet" href="widget.css">
+</head>
+<body>
+
+  <div id="scheda">
+    <h1>Batterie</h1>
+
+    <!-- I cerchi in alto, come il widget di Apple -->
+    <div id="cerchi"></div>
+
+    <div class="linea"></div>
+
+    <!-- La lista con nome, percentuale e mini batteria -->
+    <div id="lista"></div>
+
+    <!-- Messaggio se non c'è nessun dispositivo -->
+    <p id="vuoto">Nessun dispositivo con batteria collegato.</p>
+  </div>
+
+  <script src="widget.js"></script>
+</body>
+</html>
