@@ -1,0 +1,114 @@
+/* barra.css - le mini batterie appoggiate sulla barra di Windows */
+
+/* Colori per la barra scura */
+:root {
+  --testo: #ffffff;
+  --bordo: rgba(255, 255, 255, 0.75);
+  --sopra: rgba(255, 255, 255, 0.08);
+  --premuto: rgba(255, 255, 255, 0.05);
+}
+
+/* Colori per la barra chiara */
+@media (prefers-color-scheme: light) {
+  :root {
+    --testo: #1c1c1e;
+    --bordo: rgba(0, 0, 0, 0.6);
+    --sopra: rgba(0, 0, 0, 0.06);
+    --premuto: rgba(0, 0, 0, 0.04);
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  font-family: "Segoe UI Variable Text", "Segoe UI", -apple-system, sans-serif;
+  color: var(--testo);
+}
+
+#dispositivi {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 2px;
+}
+
+/* Un dispositivo: icona + percentuale + mini batteria */
+.dispositivo {
+  width: 88px;
+  height: 40px;
+  margin: 0 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+/* Effetto quando passi sopra con il mouse, come i pulsanti di Windows */
+.dispositivo:hover {
+  background: var(--sopra);
+}
+
+.dispositivo:active {
+  background: var(--premuto);
+}
+
+.icona {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.percentuale {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Quando non c'è nessun dispositivo: solo l'icona Bluetooth, più chiara */
+.dispositivo.vuoto {
+  width: 40px;
+  opacity: 0.5;
+}
+
+/* ----- La mini batteria ----- */
+
+.batteria {
+  position: relative;
+  width: 23px;
+  height: 12px;
+  border: 1.3px solid var(--bordo);
+  border-radius: 3.5px;
+  padding: 1.3px;
+  margin-right: 3px;
+  flex-shrink: 0;
+}
+
+/* La punta della batteria */
+.batteria::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 2.7px;
+  width: 2px;
+  height: 4px;
+  background: var(--bordo);
+  border-radius: 0 1.5px 1.5px 0;
+}
+
+.carica {
+  height: 100%;
+  border-radius: 1.5px;
+}

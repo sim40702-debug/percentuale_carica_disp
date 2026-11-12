@@ -1,1 +1,17 @@
+# Pacchetti installati con npm install (si riscaricano sempre)
 node_modules/
+
+# Programma di installazione creato con npm run crea-exe
+dist/
+
+# File di log
+npm-debug.log*
+*.log
+
+# File creati da Mac e Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Impostazioni di VS Code
+.vscode/

@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self'">
   <title>Batterie</title>
   <link rel="stylesheet" href="widget.css">
 </head>
@@ -20,9 +20,10 @@
     <div id="lista"></div>
 
     <!-- Messaggio se non c'è nessun dispositivo -->
-    <p id="vuoto">Nessun dispositivo con batteria collegato.</p>
+    <p id="vuoto">Nessun dispositivo collegato.</p>
   </div>
 
+  <script src="comune.js"></script>
   <script src="widget.js"></script>
 </body>
 </html>
