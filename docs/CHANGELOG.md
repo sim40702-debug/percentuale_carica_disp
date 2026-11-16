@@ -3,7 +3,7 @@
 Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.0).
 La sezione della versione diventa la descrizione della release su GitHub.
 
-## 0.1.3 — 16/11/2026 (riscritta in C#, molto più leggera)
+## 0.2.0 — 16/11/2026 (riscritta in C#, molto più leggera)
 - **Riscritta in C# (WPF)** al posto di Electron: usa molta meno memoria e parte più in fretta.
 - **Niente più PowerShell**: le batterie e la posizione della barra si leggono direttamente da Windows, senza
   aprire programmi in sottofondo.
@@ -13,7 +13,7 @@ La sezione della versione diventa la descrizione della release su GitHub.
   avvisi e animazioni.
 - Le impostazioni ora si salvano in `%APPDATA%\BatterieInBarra`: nomi e dispositivi nascosti vanno rifatti una volta.
 
-**Come si usa**: scarica `BatterieInBarra-0.1.3.exe` qui sotto e aprilo. Se Windows mostra "Windows ha protetto
+**Come si usa**: scarica `BatterieInBarra-0.2.0.exe` qui sotto e aprilo. Se Windows mostra "Windows ha protetto
 il PC", clicca "Ulteriori informazioni" e poi "Esegui comunque". Se avevi installato la 0.1.x, disinstallala da
 Impostazioni → App.
 
