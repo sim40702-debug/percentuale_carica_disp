@@ -17,14 +17,25 @@ namespace BatterieInBarra
         public static Color Giallo = Color.FromRgb(0xFF, 0xCC, 0x00);
         public static Color Rosso = Color.FromRgb(0xFF, 0x3B, 0x30);
 
+        // Le scelte dei colori (le aggiorna App dalle impostazioni)
+        public static int SogliaGiallo = 40;
+        public static int SogliaRosso = 20;
+        public static bool TuttoBianco = false;
+        // Il colore "bianco" cambia: bianco sulla barra scura, grigio scuro su quella chiara
+        public static Color ColoreNeutro = Colors.White;
+
         // Sceglie il colore in base alla percentuale
         public static Color ColoreBatteria(int percentuale)
         {
-            if (percentuale <= 20)
+            if (percentuale <= SogliaRosso)
             {
                 return Rosso;
             }
-            if (percentuale <= 40)
+            if (TuttoBianco)
+            {
+                return ColoreNeutro;
+            }
+            if (percentuale <= SogliaGiallo)
             {
                 return Giallo;
             }
@@ -90,9 +101,18 @@ namespace BatterieInBarra
 
         const string BLUETOOTH = "M7 7 L17 17 L12 22 V2 L17 7 L7 17";
 
+        const string PORTATILE = "M5 5 H19 A1 1 0 0 1 20 6 V15 H4 V6 A1 1 0 0 1 5 5 Z M2 18 H22";
+
+        // Il nome speciale usato per la batteria del PC
+        public const string NOME_PC = "__pc__";
+
         // Indovina il tipo di dispositivo dal nome
         public static string TipoDispositivo(string nome)
         {
+            if (nome == NOME_PC)
+            {
+                return "portatile";
+            }
             string n = nome.ToLower();
 
             string[] cuffie = { "cuffie", "head", "buds", "airpods", "earbuds", "wh-", "wf-", "jbl", "bose", "beats", "auricolari" };
@@ -129,6 +149,7 @@ namespace BatterieInBarra
                 case "tastiera": disegno = TASTIERA; break;
                 case "mouse": disegno = MOUSE; break;
                 case "controller": disegno = CONTROLLER; break;
+                case "portatile": disegno = PORTATILE; break;
             }
 
             System.Windows.Shapes.Path linee = new System.Windows.Shapes.Path();

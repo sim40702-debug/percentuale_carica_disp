@@ -21,6 +21,8 @@ namespace BatterieInBarra
         Dictionary<string, Border> elementi = new Dictionary<string, Border>();
         bool mostraPercentuale = true;
         ContextMenu menu;
+        MenuItem voceAggiorna;          // "Aggiorna alla versione ..." (si vede solo se c'è una versione nuova)
+        Separator separatoreAggiorna;
 
         public BarraWindow()
         {
@@ -61,12 +63,15 @@ namespace BatterieInBarra
         {
             mostraPercentuale = percentuale;
 
+            // Batterie "bianche": bianche sulla barra scura, grigio scuro su quella chiara
+            Grafica.ColoreNeutro = Grafica.BarraChiara() ? Color.FromRgb(0x3A, 0x3A, 0x3C) : Colors.White;
+
             // Nessun dispositivo: mostriamo solo l'icona Bluetooth chiara
             if (lista.Count == 0)
             {
                 Vista nessuno = new Vista();
                 nessuno.Originale = "nessuno";
-                nessuno.Nome = "Nessun dispositivo collegato";
+                nessuno.Nome = Testi.T("nessun_dispositivo");
                 nessuno.Batteria = -1;
                 lista = new List<Vista>();
                 lista.Add(nessuno);
@@ -109,6 +114,51 @@ namespace BatterieInBarra
                 }
                 RiempiElemento(elemento, v);
             }
+
+            // 3. Se hai cambiato l'ordine nelle Impostazioni, rimettiamo i riquadri nell'ordine giusto
+            List<string> ordineGiusto = new List<string>();
+            foreach (Vista v in lista)
+            {
+                ordineGiusto.Add(v.Originale);
+            }
+            if (!OrdineUguale(ordineGiusto))
+            {
+                foreach (string nome in ordineGiusto)
+                {
+                    Border elemento = elementi[nome];
+                    Contenitore.Children.Remove(elemento);
+                    Contenitore.Children.Add(elemento);
+                }
+            }
+        }
+
+        // I riquadri sulla barra sono già nell'ordine giusto?
+        bool OrdineUguale(List<string> ordineGiusto)
+        {
+            List<string> ordineAdesso = new List<string>();
+            foreach (UIElement figlio in Contenitore.Children)
+            {
+                foreach (KeyValuePair<string, Border> coppia in elementi)
+                {
+                    if (coppia.Value == figlio)
+                    {
+                        ordineAdesso.Add(coppia.Key);
+                    }
+                }
+            }
+
+            if (ordineAdesso.Count != ordineGiusto.Count)
+            {
+                return false;
+            }
+            for (int i = 0; i < ordineGiusto.Count; i++)
+            {
+                if (ordineAdesso[i] != ordineGiusto[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         // Il riquadro di un dispositivo (vuoto: lo riempie RiempiElemento)
@@ -228,13 +278,22 @@ namespace BatterieInBarra
         void CreaMenu()
         {
             menu = new ContextMenu();
-            menu.Items.Add(CreaVoce("Aggiorna ora", QuandoAggiorna));
-            menu.Items.Add(CreaVoce("Impostazioni…", QuandoImpostazioni));
+
+            voceAggiorna = CreaVoce(Testi.T("menu_aggiorna_versione", ""), QuandoInstallaAggiornamento);
+            voceAggiorna.FontWeight = FontWeights.SemiBold;
+            separatoreAggiorna = new Separator();
+            voceAggiorna.Visibility = Visibility.Collapsed;
+            separatoreAggiorna.Visibility = Visibility.Collapsed;
+            menu.Items.Add(voceAggiorna);
+            menu.Items.Add(separatoreAggiorna);
+
+            menu.Items.Add(CreaVoce(Testi.T("menu_aggiorna_batterie"), QuandoAggiorna));
+            menu.Items.Add(CreaVoce(Testi.T("menu_impostazioni"), QuandoImpostazioni));
             menu.Items.Add(new Separator());
-            menu.Items.Add(CreaVoce("Sposta a sinistra", QuandoSinistra));
-            menu.Items.Add(CreaVoce("Sposta a destra", QuandoDestra));
+            menu.Items.Add(CreaVoce(Testi.T("menu_sinistra"), QuandoSinistra));
+            menu.Items.Add(CreaVoce(Testi.T("menu_destra"), QuandoDestra));
             menu.Items.Add(new Separator());
-            menu.Items.Add(CreaVoce("Esci", QuandoEsci));
+            menu.Items.Add(CreaVoce(Testi.T("menu_esci"), QuandoEsci));
         }
 
         MenuItem CreaVoce(string testo, RoutedEventHandler quandoClic)
@@ -243,6 +302,27 @@ namespace BatterieInBarra
             voce.Header = testo;
             voce.Click += quandoClic;
             return voce;
+        }
+
+        // La chiama App: mostra (o nasconde) la voce per installare la versione nuova
+        public void MostraAggiornamento(NuovaVersione nuova)
+        {
+            if (nuova == null)
+            {
+                voceAggiorna.Visibility = Visibility.Collapsed;
+                separatoreAggiorna.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                voceAggiorna.Header = Testi.T("menu_aggiorna_versione", nuova.Versione);
+                voceAggiorna.Visibility = Visibility.Visible;
+                separatoreAggiorna.Visibility = Visibility.Visible;
+            }
+        }
+
+        async void QuandoInstallaAggiornamento(object sender, RoutedEventArgs e)
+        {
+            await App.Corrente.InstallaAggiornamento();
         }
 
         async void QuandoAggiorna(object sender, RoutedEventArgs e)

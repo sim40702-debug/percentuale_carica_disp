@@ -28,6 +28,18 @@ namespace BatterieInBarra
             }
         }
 
+        // Toglie il nome dell'app da Windows (quando elimini l'app)
+        public static void Togli()
+        {
+            try
+            {
+                Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\AppUserModelId\" + ID_APP, false);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
         public static void Manda(string titolo, string testo)
         {
             try

@@ -1,7 +1,8 @@
 // Cronologia.cs
-// Si ricorda la batteria nel tempo, per:
-// - il grafico delle ultime 24 ore
+// Si ricorda la batteria nel tempo (fino a 7 giorni), per:
+// - i grafici delle ultime 24 ore e degli ultimi 7 giorni
 // - il tempo stimato ("circa 6 ore rimaste")
+// - la durata di una carica (per le statistiche)
 
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace BatterieInBarra
     public class Cronologia
     {
         const long UN_MINUTO = 60 * 1000;
-        const long UN_ORA = 60 * UN_MINUTO;
+        public const long UN_ORA = 60 * UN_MINUTO;
         const long SETTE_GIORNI = 7 * 24 * UN_ORA;
         const long OGNI_QUANTO_SALVARE = 10 * UN_MINUTO;  // un punto ogni 10 minuti (o se cambia la %)
         public const long PAUSA_MASSIMA = 20 * UN_MINUTO; // più di 20 minuti senza dati = scollegato
@@ -83,8 +84,39 @@ namespace BatterieInBarra
             File.WriteAllText(file, JsonSerializer.Serialize(dati));
         }
 
-        // I punti delle ultime 24 ore (per il grafico)
-        public List<Lettura> Ultime24Ore(string nome)
+        // L'ultima lettura salvata (null se non ce ne sono)
+        public Lettura UltimaLettura(string nome)
+        {
+            if (!dati.ContainsKey(nome) || dati[nome].Count == 0)
+            {
+                return null;
+            }
+            return dati[nome][dati[nome].Count - 1];
+        }
+
+        // Quante letture sono salvate in tutto
+        public int NumeroLetture()
+        {
+            int totale = 0;
+            foreach (List<Lettura> punti in dati.Values)
+            {
+                totale = totale + punti.Count;
+            }
+            return totale;
+        }
+
+        // Cancella tutta la cronologia
+        public void Cancella()
+        {
+            dati.Clear();
+            if (File.Exists(file))
+            {
+                File.Delete(file);
+            }
+        }
+
+        // I punti degli ultimi "ore" (24 per il grafico di un giorno, 168 per 7 giorni)
+        public List<Lettura> UltimeOre(string nome, int ore)
         {
             List<Lettura> risultato = new List<Lettura>();
             if (!dati.ContainsKey(nome))
@@ -92,7 +124,7 @@ namespace BatterieInBarra
                 return risultato;
             }
 
-            long inizio = Adesso() - 24 * UN_ORA;
+            long inizio = Adesso() - ore * UN_ORA;
             foreach (Lettura l in dati[nome])
             {
                 if (l.T >= inizio)
@@ -103,12 +135,20 @@ namespace BatterieInBarra
             return risultato;
         }
 
-        // Quanto tempo rimane, guardando quanto scende la batteria dall'ultima carica
-        public string TempoStimato(string nome)
+
+        // ----- Calcoli sulla scarica -----
+
+        // Guarda l'ultima scarica (da quando la batteria è salita l'ultima volta):
+        // - tempoCollegato: quanto tempo è stato acceso (senza le pause)
+        // - scesa: di quanti punti % è scesa
+        // Restituisce false se non ci sono abbastanza dati.
+        bool CalcolaScarica(string nome, out long tempoCollegato, out int scesa)
         {
+            tempoCollegato = 0;
+            scesa = 0;
             if (!dati.ContainsKey(nome) || dati[nome].Count < 2)
             {
-                return "Calcolo in corso…";
+                return false;
             }
             List<Lettura> punti = dati[nome];
 
@@ -122,8 +162,7 @@ namespace BatterieInBarra
                 }
             }
 
-            // 2. Quanto tempo è stato collegato da allora (senza contare le pause)
-            long tempoCollegato = 0;
+            // 2. Quanto tempo è stato collegato da allora
             for (int i = inizio + 1; i < punti.Count; i++)
             {
                 long pausa = punti[i].T - punti[i - 1].T;
@@ -134,32 +173,76 @@ namespace BatterieInBarra
             }
 
             // 3. Quanto è scesa
-            Lettura ultima = punti[punti.Count - 1];
-            int scesa = punti[inizio].P - ultima.P;
+            scesa = punti[inizio].P - punti[punti.Count - 1].P;
+            return true;
+        }
+
+        // Quanto dura una carica completa (0-100%), guardando l'ultima scarica. -1 se non si sa.
+        public double OrePerCaricaCompleta(string nome)
+        {
+            long tempoCollegato;
+            int scesa;
+            if (!CalcolaScarica(nome, out tempoCollegato, out scesa))
+            {
+                return -1;
+            }
+
+            // Servono almeno 5 punti di differenza e un'ora di dati
+            if (scesa < 5 || tempoCollegato < UN_ORA)
+            {
+                return -1;
+            }
+            return (double)tempoCollegato / scesa * 100 / UN_ORA;
+        }
+
+        // Quanto tempo rimane ("circa 6 ore rimaste")
+        public string TempoStimato(string nome)
+        {
+            long tempoCollegato;
+            int scesa;
+            if (!CalcolaScarica(nome, out tempoCollegato, out scesa))
+            {
+                return Testi.T("calcolo");
+            }
 
             // Servono almeno 3 punti di differenza e mezz'ora di dati
             if (scesa < 3 || tempoCollegato < 30 * UN_MINUTO)
             {
-                return "Calcolo in corso…";
+                return Testi.T("calcolo");
             }
 
-            // 4. Tempo per ogni punto % e tempo rimasto
+            int adesso = UltimaLettura(nome).P;
             double tempoPerPunto = (double)tempoCollegato / scesa;
-            double oreRimaste = ultima.P * tempoPerPunto / UN_ORA;
+            double oreRimaste = adesso * tempoPerPunto / UN_ORA;
+            return TestoTempoRimasto(oreRimaste);
+        }
 
+        // Trasforma le ore rimaste in testo
+        public static string TestoTempoRimasto(double oreRimaste)
+        {
             if (oreRimaste < 1)
             {
-                return "meno di 1 ora rimasta";
+                return Testi.T("meno_1_ora");
             }
             if (oreRimaste < 1.5)
             {
-                return "circa 1 ora rimasta";
+                return Testi.T("circa_1_ora");
             }
             if (oreRimaste < 48)
             {
-                return "circa " + Math.Round(oreRimaste) + " ore rimaste";
+                return Testi.T("circa_ore", Math.Round(oreRimaste));
             }
-            return "circa " + Math.Round(oreRimaste / 24) + " giorni rimasti";
+            return Testi.T("circa_giorni", Math.Round(oreRimaste / 24));
+        }
+
+        // Trasforma una durata in ore in testo ("18 ore", "3 giorni")
+        public static string TestoDurata(double ore)
+        {
+            if (ore < 48)
+            {
+                return Testi.T("ore", Math.Round(ore));
+            }
+            return Testi.T("giorni", Math.Round(ore / 24));
         }
     }
 }

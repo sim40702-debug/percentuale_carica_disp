@@ -1,5 +1,5 @@
 // WidgetWindow.xaml.cs
-// Il widget: cerchi, lista con il tempo stimato e grafico delle ultime 24 ore.
+// Il widget: cerchi, lista con il tempo stimato, grafico (24 ore o 7 giorni) e statistiche.
 
 using System;
 using System.Collections.Generic;
@@ -14,6 +14,7 @@ namespace BatterieInBarra
     {
         List<Vista> ultimaLista = new List<Vista>();
         string dispositivoGrafico = "";   // il dispositivo scelto per il grafico (nome originale)
+        bool grafico7Giorni = false;      // false = ultime 24 ore, true = ultimi 7 giorni
 
         // Colori del tema (chiaro o scuro)
         Brush testo;
@@ -52,6 +53,7 @@ namespace BatterieInBarra
                 anelloVuoto = Grafica.Pennello("#1A000000");
                 bottone = Grafica.Pennello("#0F000000");
                 bottoneScelto = Grafica.Pennello("#29000000");
+                Grafica.ColoreNeutro = Color.FromRgb(0x3A, 0x3A, 0x3C);
             }
             else
             {
@@ -63,6 +65,7 @@ namespace BatterieInBarra
                 anelloVuoto = Grafica.Pennello("#24FFFFFF");
                 bottone = Grafica.Pennello("#2C2C2E");
                 bottoneScelto = Grafica.Pennello("#636366");
+                Grafica.ColoreNeutro = Colors.White;
             }
             bordoBatteria = Grafica.Pennello("#8E8E93");
 
@@ -71,6 +74,9 @@ namespace BatterieInBarra
             Vuoto.Foreground = testoGrigio;
             Linea1.Background = linea;
             Linea2.Background = linea;
+            TestoDurata.Foreground = testoGrigio;
+            TestoCariche.Foreground = testoGrigio;
+            TestoSalute.Foreground = Grafica.Pennello(Grafica.Rosso);
         }
 
 
@@ -185,7 +191,11 @@ namespace BatterieInBarra
             TextBlock tempo = new TextBlock();
             tempo.Text = v.Tempo;
             tempo.FontSize = 11;
-            if (v.Batteria <= 20)
+            if (v.InCarica)
+            {
+                tempo.Foreground = Grafica.Pennello(Grafica.Verde);
+            }
+            else if (v.Batteria <= Grafica.SogliaRosso)
             {
                 tempo.Foreground = Grafica.Pennello(Grafica.Rosso);
             }
@@ -214,7 +224,7 @@ namespace BatterieInBarra
         }
 
 
-        // ----- Grafico delle ultime 24 ore -----
+        // ----- Grafico e statistiche -----
 
         void MostraGrafico()
         {
@@ -233,63 +243,94 @@ namespace BatterieInBarra
                 dispositivoGrafico = scelto.Originale;
             }
 
+            // 24 ore / 7 giorni
+            ScegliPeriodo.Children.Clear();
+            ScegliPeriodo.Children.Add(CreaBottone(Testi.T("24_ore"), !grafico7Giorni, () => { grafico7Giorni = false; MostraGrafico(); }));
+            ScegliPeriodo.Children.Add(CreaBottone(Testi.T("7_giorni"), grafico7Giorni, () => { grafico7Giorni = true; MostraGrafico(); }));
+
             // Bottoni per scegliere il dispositivo
             SceltaGrafico.Children.Clear();
             foreach (Vista v in ultimaLista)
             {
-                SceltaGrafico.Children.Add(CreaBottone(v));
+                string originale = v.Originale;
+                bool eScelto = originale == dispositivoGrafico;
+                SceltaGrafico.Children.Add(CreaBottone(v.Nome, eScelto, () => { dispositivoGrafico = originale; MostraGrafico(); }));
             }
 
-            DisegnaGrafico(scelto.Storia, Grafica.ColoreBatteria(scelto.Batteria));
+            // Il grafico
+            Color colore = Grafica.ColoreBatteria(scelto.Batteria);
+            if (grafico7Giorni)
+            {
+                DisegnaGrafico(scelto.Storia7, colore, 24 * 7,
+                    new string[] { Testi.T("7_giorni_fa"), Testi.T("4_giorni_fa"), Testi.T("adesso") }, 3.0 / 7.0);
+            }
+            else
+            {
+                DisegnaGrafico(scelto.Storia24, colore, 24,
+                    new string[] { Testi.T("24_ore_fa"), Testi.T("12_ore_fa"), Testi.T("adesso") }, 0.5);
+            }
+
+            // Le statistiche
+            TestoDurata.Text = scelto.DurataCarica;
+            TestoCariche.Text = scelto.CaricheMese;
+            if (scelto.BatteriaPeggiorata)
+            {
+                TestoSalute.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                TestoSalute.Visibility = Visibility.Collapsed;
+            }
         }
 
-        FrameworkElement CreaBottone(Vista v)
+        // Un bottone arrotondato; "quandoClic" è quello che succede quando lo clicchi
+        FrameworkElement CreaBottone(string scritta, bool scelto, Action quandoClic)
         {
-            TextBlock scritta = new TextBlock();
-            scritta.Text = v.Nome;
-            scritta.FontSize = 12;
+            TextBlock testoBottone = new TextBlock();
+            testoBottone.Text = scritta;
+            testoBottone.FontSize = 12;
 
             Border bottoneGrafico = new Border();
             bottoneGrafico.CornerRadius = new CornerRadius(12);
             bottoneGrafico.Padding = new Thickness(10, 3, 10, 4);
             bottoneGrafico.Margin = new Thickness(0, 0, 4, 4);
             bottoneGrafico.Cursor = System.Windows.Input.Cursors.Hand;
-            bottoneGrafico.Child = scritta;
+            bottoneGrafico.Child = testoBottone;
 
-            if (v.Originale == dispositivoGrafico)
+            if (scelto)
             {
                 bottoneGrafico.Background = bottoneScelto;
-                scritta.Foreground = testo;
+                testoBottone.Foreground = testo;
             }
             else
             {
                 bottoneGrafico.Background = bottone;
-                scritta.Foreground = testoGrigio;
+                testoBottone.Foreground = testoGrigio;
             }
 
-            string originale = v.Originale;
-            bottoneGrafico.MouseLeftButtonUp += (s, e) =>
-            {
-                dispositivoGrafico = originale;
-                MostraGrafico();
-            };
+            bottoneGrafico.MouseLeftButtonUp += (s, e) => quandoClic();
             return bottoneGrafico;
         }
 
-        void DisegnaGrafico(List<Lettura> punti, Color colore)
+        // Disegna il grafico:
+        // - punti: le letture da disegnare
+        // - ore: quante ore mostra il grafico (24 o 168)
+        // - etichette: le tre scritte sotto (sinistra, in mezzo, destra)
+        // - posizioneMezzo: dove va la scritta in mezzo (0.5 = metà)
+        void DisegnaGrafico(List<Lettura> punti, Color colore, int ore, string[] etichette, double posizioneMezzo)
         {
             const double L = 280;
             const double A = 80;
-            const long VENTIQUATTRO_ORE = 24L * 60 * 60 * 1000;
 
             Grafico.Children.Clear();
+            long durata = ore * Cronologia.UN_ORA;
             long adesso = Cronologia.Adesso();
-            long inizio = adesso - VENTIQUATTRO_ORE;
+            long inizio = adesso - durata;
 
             if (punti.Count < 2)
             {
                 TextBlock pochi = new TextBlock();
-                pochi.Text = "Ancora pochi dati: il grafico si riempie con il tempo.";
+                pochi.Text = Testi.T("pochi_dati");
                 pochi.Foreground = testoGrigio;
                 pochi.FontSize = 12;
                 pochi.TextWrapping = TextWrapping.Wrap;
@@ -319,7 +360,7 @@ namespace BatterieInBarra
             }
             pezzi.Add(pezzo);
 
-            // L'area colorata va da colore trasparente (sotto) a colore leggero (sopra)
+            // L'area colorata va da colore leggero (sopra) a trasparente (sotto)
             LinearGradientBrush sfumatura = new LinearGradientBrush();
             sfumatura.StartPoint = new Point(0, 0);
             sfumatura.EndPoint = new Point(0, 1);
@@ -331,7 +372,7 @@ namespace BatterieInBarra
                 PointCollection lineaPunti = new PointCollection();
                 foreach (Lettura l in p)
                 {
-                    lineaPunti.Add(new Point(X(l.T, inizio, VENTIQUATTRO_ORE, L), Y(l.P, A)));
+                    lineaPunti.Add(new Point(X(l.T, inizio, durata, L), Y(l.P, A)));
                 }
 
                 // Se il pezzo arriva fino ad adesso, lo allunghiamo fino al bordo destro
@@ -360,9 +401,9 @@ namespace BatterieInBarra
             }
 
             // Scritte sotto
-            AggiungiEtichetta("24 ore fa", 0, A + 3, TextAlignment.Left);
-            AggiungiEtichetta("12 ore fa", L / 2, A + 3, TextAlignment.Center);
-            AggiungiEtichetta("adesso", L, A + 3, TextAlignment.Right);
+            AggiungiEtichetta(etichette[0], 0, A + 3, TextAlignment.Left);
+            AggiungiEtichetta(etichette[1], L * posizioneMezzo, A + 3, TextAlignment.Center);
+            AggiungiEtichetta(etichette[2], L, A + 3, TextAlignment.Right);
         }
 
         // Trasforma ora e percentuale in coordinate
@@ -398,18 +439,18 @@ namespace BatterieInBarra
             etichetta.Text = testoEtichetta;
             etichetta.Foreground = testoGrigio;
             etichetta.FontSize = 10;
-            etichetta.Width = 80;
+            etichetta.Width = 90;
             etichetta.TextAlignment = allineamento;
 
             // La posizione dipende dall'allineamento (sinistra, centro, destra)
             double sinistra = x;
             if (allineamento == TextAlignment.Center)
             {
-                sinistra = x - 40;
+                sinistra = x - 45;
             }
             if (allineamento == TextAlignment.Right)
             {
-                sinistra = x - 80;
+                sinistra = x - 90;
             }
             Canvas.SetLeft(etichetta, sinistra);
             Canvas.SetTop(etichetta, y);

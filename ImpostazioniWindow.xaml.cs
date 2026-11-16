@@ -13,6 +13,7 @@ namespace BatterieInBarra
     public partial class ImpostazioniWindow : Window
     {
         Impostazioni opzioni;
+        bool staCaricando = true;   // mentre mettiamo i valori iniziali, i clic non vanno salvati
 
         public ImpostazioniWindow()
         {
@@ -26,14 +27,45 @@ namespace BatterieInBarra
             MostraPercentuale.IsChecked = opzioni.MostraPercentuale;
             Animazioni.IsChecked = opzioni.Animazioni;
             AvvisoCompleta.IsChecked = opzioni.AvvisoCompleta;
+            PromemoriaSerale.IsChecked = opzioni.PromemoriaSerale;
             AvvioWindows.IsChecked = opzioni.AvvioWindows;
+            ControllaAggiornamenti.IsChecked = opzioni.ControllaAggiornamenti;
 
-            // Soglia: segniamo il bottone giusto
+            // Batteria del PC: solo se il PC ha una batteria (portatile)
+            if (App.Corrente.PCHaBatteria())
+            {
+                MostraBatteriaPC.IsChecked = opzioni.MostraBatteriaPC;
+            }
+            else
+            {
+                MostraBatteriaPC.IsChecked = false;
+                MostraBatteriaPC.IsEnabled = false;
+                SottoBatteriaPC.Text = Testi.T("nessuna_batteria_pc");
+            }
+
+            // Le scelte con i bottoni
             Soglia10.IsChecked = opzioni.Soglia == 10;
             Soglia20.IsChecked = opzioni.Soglia == 20;
             Soglia30.IsChecked = opzioni.Soglia == 30;
 
+            StileColori.IsChecked = !opzioni.TuttoBianco;
+            StileBianco.IsChecked = opzioni.TuttoBianco;
+            Giallo30.IsChecked = opzioni.SogliaGiallo == 30;
+            Giallo40.IsChecked = opzioni.SogliaGiallo == 40;
+            Giallo50.IsChecked = opzioni.SogliaGiallo == 50;
+            Rosso10.IsChecked = opzioni.SogliaRosso == 10;
+            Rosso15.IsChecked = opzioni.SogliaRosso == 15;
+            Rosso20.IsChecked = opzioni.SogliaRosso == 20;
+            AggiornaSceltaGiallo();
+
+            Ora21.IsChecked = opzioni.OraPromemoria == 21;
+            Ora22.IsChecked = opzioni.OraPromemoria == 22;
+            Ora23.IsChecked = opzioni.OraPromemoria == 23;
+
             MostraDispositivi();
+            MostraAggiornamenti();
+            MostraSpazio();
+            staCaricando = false;
         }
 
         // Barra del titolo scura se Windows è scuro
@@ -43,7 +75,7 @@ namespace BatterieInBarra
         }
 
 
-        // ----- Colori (chiaro o scuro, come Windows) -----
+        // ----- Colori della finestra (chiaro o scuro, come Windows) -----
 
         void PreparaColori()
         {
@@ -88,7 +120,7 @@ namespace BatterieInBarra
             if (opzioni.Visti.Count == 0)
             {
                 TextBlock nessuno = new TextBlock();
-                nessuno.Text = "Nessun dispositivo ancora. Collega cuffie, tastiera o controller e riapri questa finestra.";
+                nessuno.Text = Testi.T("nessun_dispositivo_ancora");
                 nessuno.Foreground = Colore("TestoGrigio");
                 nessuno.FontSize = 13;
                 nessuno.TextWrapping = TextWrapping.Wrap;
@@ -104,21 +136,31 @@ namespace BatterieInBarra
                     Border separatore = new Border();
                     separatore.Height = 1;
                     separatore.Background = Colore("Linea");
-                    separatore.Margin = new Thickness(44, 0, 0, 0);
+                    separatore.Margin = new Thickness(70, 0, 0, 0);
                     ListaDispositivi.Children.Add(separatore);
                 }
-                ListaDispositivi.Children.Add(CreaRigaDispositivo(opzioni.Visti[i]));
+                bool primo = i == 0;
+                bool ultimo = i == opzioni.Visti.Count - 1;
+                ListaDispositivi.Children.Add(CreaRigaDispositivo(opzioni.Visti[i], primo, ultimo));
             }
         }
 
-        FrameworkElement CreaRigaDispositivo(string originale)
+        FrameworkElement CreaRigaDispositivo(string originale, bool primo, bool ultimo)
         {
             Grid riga = new Grid();
             riga.Margin = new Thickness(0, 11, 0, 11);
             riga.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            riga.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             riga.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             riga.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             riga.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            // Frecce per l'ordine: ▲ = più a sinistra sulla barra, ▼ = più a destra
+            StackPanel frecce = new StackPanel();
+            frecce.VerticalAlignment = VerticalAlignment.Center;
+            frecce.Margin = new Thickness(0, 0, 4, 0);
+            frecce.Children.Add(CreaFreccia("▲", Testi.T("sposta_su"), originale, -1, !primo));
+            frecce.Children.Add(CreaFreccia("▼", Testi.T("sposta_giu"), originale, 1, !ultimo));
 
             // Icona in un quadratino arrotondato
             Border icona = new Border();
@@ -137,7 +179,7 @@ namespace BatterieInBarra
             StackPanel testi = new StackPanel();
 
             TextBox campo = new TextBox();
-            campo.Width = 210;
+            campo.Width = 190;
             campo.HorizontalAlignment = HorizontalAlignment.Left;
             campo.FontSize = 14;
             campo.Padding = new Thickness(5, 3, 5, 3);
@@ -163,13 +205,13 @@ namespace BatterieInBarra
             }
             else
             {
-                sotto.Text = originale + " · non collegato";
+                sotto.Text = originale + " · " + Testi.T("non_collegato");
             }
             testi.Children.Add(sotto);
 
             // "Sulla barra" e interruttore
             TextBlock etichetta = new TextBlock();
-            etichetta.Text = "Sulla barra";
+            etichetta.Text = Testi.T("sulla_barra");
             etichetta.FontSize = 12;
             etichetta.Foreground = Colore("TestoGrigio");
             etichetta.VerticalAlignment = VerticalAlignment.Center;
@@ -181,15 +223,32 @@ namespace BatterieInBarra
             interruttore.Tag = originale;
             interruttore.Click += QuandoCambiaSullaBarra;
 
-            Grid.SetColumn(icona, 0);
-            Grid.SetColumn(testi, 1);
-            Grid.SetColumn(etichetta, 2);
-            Grid.SetColumn(interruttore, 3);
+            Grid.SetColumn(frecce, 0);
+            Grid.SetColumn(icona, 1);
+            Grid.SetColumn(testi, 2);
+            Grid.SetColumn(etichetta, 3);
+            Grid.SetColumn(interruttore, 4);
+            riga.Children.Add(frecce);
             riga.Children.Add(icona);
             riga.Children.Add(testi);
             riga.Children.Add(etichetta);
             riga.Children.Add(interruttore);
             return riga;
+        }
+
+        Button CreaFreccia(string simbolo, string suggerimento, string originale, int direzione, bool attiva)
+        {
+            Button freccia = new Button();
+            freccia.Style = (Style)Resources["Freccia"];
+            freccia.Content = simbolo;
+            freccia.ToolTip = suggerimento;
+            freccia.IsEnabled = attiva;
+            freccia.Click += (s, e) =>
+            {
+                App.Corrente.SpostaDispositivo(originale, direzione);
+                MostraDispositivi();
+            };
+            return freccia;
         }
 
         // Quando finisci di scrivere il nome (clic fuori), lo salviamo
@@ -236,23 +295,196 @@ namespace BatterieInBarra
         }
 
 
-        // ----- Interruttori e soglia -----
+        // ----- Interruttori e scelte -----
 
         void QuandoCambiaInterruttore(object sender, RoutedEventArgs e)
         {
+            if (staCaricando)
+            {
+                return;
+            }
             opzioni.MostraPercentuale = MostraPercentuale.IsChecked == true;
             opzioni.Animazioni = Animazioni.IsChecked == true;
             opzioni.AvvisoCompleta = AvvisoCompleta.IsChecked == true;
+            opzioni.PromemoriaSerale = PromemoriaSerale.IsChecked == true;
             opzioni.AvvioWindows = AvvioWindows.IsChecked == true;
+            opzioni.ControllaAggiornamenti = ControllaAggiornamenti.IsChecked == true;
+            if (MostraBatteriaPC.IsEnabled)
+            {
+                opzioni.MostraBatteriaPC = MostraBatteriaPC.IsChecked == true;
+            }
             App.Corrente.ImpostazioniCambiate();
         }
 
         void QuandoCambiaSoglia(object sender, RoutedEventArgs e)
         {
+            if (staCaricando)
+            {
+                return;
+            }
             if (Soglia10.IsChecked == true) opzioni.Soglia = 10;
             if (Soglia20.IsChecked == true) opzioni.Soglia = 20;
             if (Soglia30.IsChecked == true) opzioni.Soglia = 30;
             App.Corrente.SogliaCambiata();
+        }
+
+        void QuandoCambiaColori(object sender, RoutedEventArgs e)
+        {
+            if (staCaricando)
+            {
+                return;
+            }
+            opzioni.TuttoBianco = StileBianco.IsChecked == true;
+
+            if (Giallo30.IsChecked == true) opzioni.SogliaGiallo = 30;
+            if (Giallo40.IsChecked == true) opzioni.SogliaGiallo = 40;
+            if (Giallo50.IsChecked == true) opzioni.SogliaGiallo = 50;
+
+            if (Rosso10.IsChecked == true) opzioni.SogliaRosso = 10;
+            if (Rosso15.IsChecked == true) opzioni.SogliaRosso = 15;
+            if (Rosso20.IsChecked == true) opzioni.SogliaRosso = 20;
+
+            AggiornaSceltaGiallo();
+            App.Corrente.ImpostazioniCambiate();
+        }
+
+        // Con le batterie bianche il giallo non c'è: la scelta del giallo diventa grigia
+        void AggiornaSceltaGiallo()
+        {
+            bool attiva = StileBianco.IsChecked != true;
+            Giallo30.IsEnabled = attiva;
+            Giallo40.IsEnabled = attiva;
+            Giallo50.IsEnabled = attiva;
+            TitoloGiallo.Opacity = attiva ? 1 : 0.4;
+        }
+
+        void QuandoCambiaOra(object sender, RoutedEventArgs e)
+        {
+            if (staCaricando)
+            {
+                return;
+            }
+            if (Ora21.IsChecked == true) opzioni.OraPromemoria = 21;
+            if (Ora22.IsChecked == true) opzioni.OraPromemoria = 22;
+            if (Ora23.IsChecked == true) opzioni.OraPromemoria = 23;
+            opzioni.UltimoPromemoria = "";   // con l'ora nuova il promemoria può arrivare già oggi
+            App.Corrente.ImpostazioniCambiate();
+        }
+
+
+        // ----- Aggiornamenti -----
+
+        void MostraAggiornamenti()
+        {
+            TestoVersione.Text = Testi.T("versione", Aggiornamenti.VersioneAttuale());
+            TestoStatoAggiornamenti.Text = App.Corrente.StatoAggiornamenti;
+
+            if (App.Corrente.VersioneNuova != null)
+            {
+                PulsanteAggiornamenti.Content = Testi.T("aggiorna_alla", App.Corrente.VersioneNuova.Versione);
+            }
+            else
+            {
+                PulsanteAggiornamenti.Content = Testi.T("controlla_ora");
+            }
+        }
+
+        async void QuandoPulsanteAggiornamenti(object sender, RoutedEventArgs e)
+        {
+            PulsanteAggiornamenti.IsEnabled = false;
+
+            if (App.Corrente.VersioneNuova != null)
+            {
+                // C'è una versione nuova: la installiamo (l'app si riavvia da sola)
+                PulsanteAggiornamenti.Content = Testi.T("scarico");
+                await App.Corrente.InstallaAggiornamento();
+            }
+            else
+            {
+                PulsanteAggiornamenti.Content = Testi.T("controllo");
+                await App.Corrente.ControllaAggiornamenti();
+            }
+
+            MostraAggiornamenti();
+            PulsanteAggiornamenti.IsEnabled = true;
+        }
+
+
+        // ----- Dati -----
+
+        void MostraSpazio()
+        {
+            long dati = App.Corrente.SpazioDati();
+            long programma = App.Corrente.SpazioApp();
+            int letture = App.Corrente.NumeroLetture();
+
+            TestoSpazio.Text = Testi.T("spazio_testo", Grandezza(dati), letture, Grandezza(programma));
+        }
+
+        // Trasforma i byte in un testo leggibile (KB o MB)
+        string Grandezza(long byteTotali)
+        {
+            if (byteTotali < 1024)
+            {
+                return byteTotali + " byte";
+            }
+            if (byteTotali < 1024 * 1024)
+            {
+                return Math.Round(byteTotali / 1024.0, 1) + " KB";
+            }
+            return Math.Round(byteTotali / (1024.0 * 1024.0), 1) + " MB";
+        }
+
+        // Copia negli appunti tutto quello che l'app vede, da incollare in un messaggio
+        async void QuandoCopiaSupporto(object sender, RoutedEventArgs e)
+        {
+            PulsanteSupporto.IsEnabled = false;
+            string testo = await Batterie.Diagnostica();
+            Clipboard.SetText(testo);
+            PulsanteSupporto.Content = Testi.T("copiato");
+            PulsanteSupporto.IsEnabled = true;
+        }
+
+        void QuandoApriCartella(object sender, RoutedEventArgs e)
+        {
+            App.Corrente.ApriCartellaDati();
+        }
+
+        void QuandoCancellaCronologia(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult risposta = MessageBox.Show(this, Testi.T("conferma_cronologia"),
+                Testi.T("cancella_cronologia"), MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (risposta == MessageBoxResult.Yes)
+            {
+                App.Corrente.CancellaCronologia();
+                MostraSpazio();
+            }
+        }
+
+        void QuandoRipristina(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult risposta = MessageBox.Show(this, Testi.T("conferma_ripristina"),
+                Testi.T("ripristina_impostazioni"), MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (risposta == MessageBoxResult.Yes)
+            {
+                App.Corrente.RipristinaImpostazioni();
+                // Riapriamo la finestra per mostrare i valori nuovi
+                Close();
+                App.Corrente.ApriImpostazioni();
+            }
+        }
+
+        void QuandoEliminaApp(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult risposta = MessageBox.Show(this, Testi.T("conferma_elimina"),
+                Testi.T("elimina_app"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (risposta == MessageBoxResult.Yes)
+            {
+                App.Corrente.EliminaApp();
+            }
         }
     }
 }
