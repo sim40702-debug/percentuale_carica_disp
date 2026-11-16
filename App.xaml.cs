@@ -843,16 +843,39 @@ namespace BatterieInBarra
                 return;
             }
 
+            // La finestrella con la barra di avanzamento
+            AggiornamentoWindow finestra = new AggiornamentoWindow(VersioneNuova.Versione);
+            finestra.Show();
+            finestra.Activate();
+
             try
             {
                 Registro.Scrivi("Aggiornamento: scarico la versione " + VersioneNuova.Versione);
-                string scaricato = await Aggiornamenti.Scarica(VersioneNuova);
+                string scaricato = await Aggiornamenti.Scarica(VersioneNuova, finestra.MostraAvanzamento, finestra.Annullamento);
                 Registro.Scrivi("Aggiornamento: scaricato, avvio il cambio");
+
+                finestra.MostraInstallazione();
+                await Task.Delay(800);   // giusto il tempo di leggere "Installo e riavvio l'app…"
                 Aggiornamenti.PreparaCambio(scaricato);
+            }
+            catch (OperationCanceledException) when (finestra.Annullamento.IsCancellationRequested)
+            {
+                // Hai premuto "Annulla" (o chiuso la finestrella): non succede niente, l'app resta com'è
+                Registro.Scrivi("Aggiornamento annullato");
+                if (finestra.IsVisible)
+                {
+                    finestra.Close();
+                }
+                return;
             }
             catch (Exception errore)
             {
+                // Qualcosa è andato storto (anche internet troppo lento)
                 Registro.Scrivi("Aggiornamento non riuscito: " + errore);
+                if (finestra.IsVisible)
+                {
+                    finestra.Close();
+                }
 
                 // Proponiamo di scaricarla a mano dalla pagina della release
                 MessageBoxResult risposta = MessageBox.Show(

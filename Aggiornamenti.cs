@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BatterieInBarra
@@ -93,23 +94,66 @@ namespace BatterieInBarra
         // Scarica la versione nuova accanto a quella attuale, con il nome "BatterieInBarra.nuovo.exe".
         // Restituisce il percorso del file scaricato.
         // (Il cambio vero lo fa un piccolo script DOPO che l'app si è chiusa: vedi PreparaCambio)
-        public static async Task<string> Scarica(NuovaVersione nuova)
+        // Scarica a pezzi, così possiamo mostrare la barra di avanzamento:
+        // - quandoAvanza(scaricati, totale) viene chiamata dopo ogni pezzo
+        // - stop serve per fermare tutto se premi "Annulla"
+        public static async Task<string> Scarica(NuovaVersione nuova, Action<long, long> quandoAvanza, CancellationToken stop)
         {
             string cartella = Path.GetDirectoryName(Environment.ProcessPath);
             string scaricato = Path.Combine(cartella, "BatterieInBarra.nuovo.exe");
+            long letti = 0;
 
-            using (HttpClient internet = CreaClient())
+            try
             {
-                byte[] dati = await internet.GetByteArrayAsync(nuova.Indirizzo);
-
-                // Controllo: un exe vero pesa decine di MB, non pochi KB (es. una pagina di errore)
-                if (dati.Length < 1024 * 1024)
+                using (HttpClient internet = CreaClient())
+                using (HttpResponseMessage risposta = await internet.GetAsync(nuova.Indirizzo, HttpCompletionOption.ResponseHeadersRead, stop))
                 {
-                    throw new Exception("Il file scaricato è troppo piccolo (" + dati.Length + " byte)");
+                    risposta.EnsureSuccessStatusCode();
+                    long totale = risposta.Content.Headers.ContentLength ?? -1;   // -1 = GitHub non ha detto quanto è grande
+
+                    using (Stream dalWeb = await risposta.Content.ReadAsStreamAsync(stop))
+                    using (FileStream suDisco = File.Create(scaricato))
+                    {
+                        byte[] pezzo = new byte[81920];   // 80 KB alla volta
+                        int quanti = await dalWeb.ReadAsync(pezzo, 0, pezzo.Length, stop);
+                        while (quanti > 0)
+                        {
+                            await suDisco.WriteAsync(pezzo, 0, quanti, stop);
+                            letti = letti + quanti;
+                            quandoAvanza(letti, totale);
+                            quanti = await dalWeb.ReadAsync(pezzo, 0, pezzo.Length, stop);
+                        }
+                    }
                 }
-                await File.WriteAllBytesAsync(scaricato, dati);
+            }
+            catch (Exception)
+            {
+                // Annullato o errore: non lasciamo in giro il file a metà
+                TogliFile(scaricato);
+                throw;
+            }
+
+            // Controllo: un exe vero pesa decine di MB, non pochi KB (es. una pagina di errore)
+            if (letti < 1024 * 1024)
+            {
+                TogliFile(scaricato);
+                throw new Exception("Il file scaricato è troppo piccolo (" + letti + " byte)");
             }
             return scaricato;
+        }
+
+        static void TogliFile(string percorso)
+        {
+            try
+            {
+                if (File.Exists(percorso))
+                {
+                    File.Delete(percorso);
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         // Prepara e avvia un piccolo script che:

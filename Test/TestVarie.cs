@@ -92,6 +92,16 @@ namespace BatterieInBarra.Test
             Grafica.TuttoBianco = false;   // rimettiamo come prima
         }
 
+        // ----- Grandezze (barra di avanzamento e spazio occupato) -----
+
+        [Fact]
+        public void Grandezze_dei_file()
+        {
+            Assert.Equal("512 byte", Testi.Grandezza(512));
+            Assert.Equal("2 KB", Testi.Grandezza(2 * 1024));
+            Assert.Equal("5 MB", Testi.Grandezza(5 * 1024 * 1024));
+        }
+
         // ----- Traduzioni -----
 
         [Fact]

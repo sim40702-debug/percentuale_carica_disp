@@ -41,6 +41,20 @@ namespace BatterieInBarra
             return testo;
         }
 
+        // Trasforma i byte in un testo leggibile (es. "512 byte", "12,5 KB", "61,2 MB")
+        public static string Grandezza(long byteTotali)
+        {
+            if (byteTotali < 1024)
+            {
+                return byteTotali + " byte";
+            }
+            if (byteTotali < 1024 * 1024)
+            {
+                return Math.Round(byteTotali / 1024.0, 1) + " KB";
+            }
+            return Math.Round(byteTotali / (1024.0 * 1024.0), 1) + " MB";
+        }
+
         // chiave -> { italiano, inglese, tedesco }
         static readonly Dictionary<string, string[]> TUTTI = new Dictionary<string, string[]>
         {
@@ -105,6 +119,12 @@ namespace BatterieInBarra
             { "stato_errore", new[] { "Non riesco a controllare (sei offline o il repository non è pubblico)", "Can't check (you're offline or the repository isn't public)", "Prüfung nicht möglich (offline oder Repository nicht öffentlich)" } },
             { "errore_generico", new[] { "Batterie in Barra ha avuto un problema (l'app continua a funzionare).\nSe succede di nuovo: Impostazioni → Dati → Informazioni per il supporto → Copia, e manda il testo.", "Batterie in Barra ran into a problem (the app keeps running).\nIf it happens again: Settings → Data → Support information → Copy, and send the text.", "Batterie in Barra hatte ein Problem (die App läuft weiter).\nWenn es wieder passiert: Einstellungen → Daten → Support-Informationen → Kopieren, und den Text senden." } },
             { "apri_pagina_release", new[] { "Vuoi aprire la pagina per scaricarla a mano? (le impostazioni restano)", "Open the page to download it manually? (your settings are kept)", "Seite öffnen, um sie manuell herunterzuladen? (Einstellungen bleiben erhalten)" } },
+            { "agg_titolo", new[] { "Aggiornamento alla versione {0}", "Updating to version {0}", "Update auf Version {0}" } },
+            { "agg_scarico", new[] { "Scarico la versione nuova…", "Downloading the new version…", "Neue Version wird geladen…" } },
+            { "agg_avanzamento", new[] { "{0} di {1} · {2}%", "{0} of {1} · {2}%", "{0} von {1} · {2}%" } },
+            { "agg_avanzamento_senza_totale", new[] { "{0} scaricati", "{0} downloaded", "{0} geladen" } },
+            { "agg_installo", new[] { "Installo e riavvio l'app… i tuoi dati restano.", "Installing and restarting… your data is kept.", "Installiere und starte neu… deine Daten bleiben erhalten." } },
+            { "annulla", new[] { "Annulla", "Cancel", "Abbrechen" } },
             { "errore_aggiornamento", new[] { "Non sono riuscito ad aggiornare l'app.", "The app could not be updated.", "Die App konnte nicht aktualisiert werden." } },
 
             // ----- Impostazioni -----

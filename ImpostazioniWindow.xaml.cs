@@ -445,22 +445,9 @@ namespace BatterieInBarra
             long programma = App.Corrente.SpazioApp();
             int letture = App.Corrente.NumeroLetture();
 
-            TestoSpazio.Text = Testi.T("spazio_testo", Grandezza(dati), letture, Grandezza(programma));
+            TestoSpazio.Text = Testi.T("spazio_testo", Testi.Grandezza(dati), letture, Testi.Grandezza(programma));
         }
 
-        // Trasforma i byte in un testo leggibile (KB o MB)
-        string Grandezza(long byteTotali)
-        {
-            if (byteTotali < 1024)
-            {
-                return byteTotali + " byte";
-            }
-            if (byteTotali < 1024 * 1024)
-            {
-                return Math.Round(byteTotali / 1024.0, 1) + " KB";
-            }
-            return Math.Round(byteTotali / (1024.0 * 1024.0), 1) + " MB";
-        }
 
         // Copia negli appunti tutto quello che l'app vede, da incollare in un messaggio
         async void QuandoCopiaSupporto(object sender, RoutedEventArgs e)

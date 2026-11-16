@@ -15,12 +15,12 @@ Scritta in **C# (WPF, .NET 10)**: leggera, senza PowerShell né browser dentro.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.2.8 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.2.10 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.2.8" && git push && git tag v0.2.8 && git push origin v0.2.8
+   git pull && git add . && git commit -m "Versione 0.2.10" && git push && git tag v0.2.10 && git push origin v0.2.10
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.2.8" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.2.10" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.
@@ -38,6 +38,7 @@ L'app installata cerca da sola le versioni nuove nelle Releases di questo reposi
 - `Statistiche.cs` - cariche del mese, durata media di una carica, salute della batteria
 - `Testi.cs` - tutte le scritte in italiano, inglese e tedesco
 - `AirPods.cs` - legge la batteria di AirPods e Beats dai messaggi Bluetooth di Apple
+- `PlayStation.cs` - legge la batteria dei controller PS4 e PS5 dai loro dati
 - `Avvisi.cs` - le notifiche di Windows
 - `Aggiornamenti.cs` - cerca le versioni nuove su GitHub e le installa
 - `Registro.cs` - il registro dell'app (avvii, aggiornamenti, errori)
@@ -47,6 +48,7 @@ L'app installata cerca da sola le versioni nuove nelle Releases di questo reposi
 - `BarraWindow` - le mini batterie sulla barra
 - `WidgetWindow` - il widget con cerchi, lista e grafico
 - `ImpostazioniWindow` - la finestra Impostazioni
+- `AggiornamentoWindow` - la barra di avanzamento durante l'aggiornamento
 
 Le impostazioni e la cronologia vengono salvate in `%APPDATA%\BatterieInBarra`.
 

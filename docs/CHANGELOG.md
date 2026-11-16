@@ -1,7 +1,20 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.7).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.9).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.2.9 — 16/11/2026 (controller PlayStation)
+- **Controller PS4 (DualShock 4) e PS5 (DualSense)**: adesso compaiono anche loro, via Bluetooth e col cavo.
+  Windows non conosce la loro batteria, quindi l'app la legge direttamente dai dati del controller (come fanno
+  DS4Windows e Steam). Il PS4 va a scatti di circa 12% (il controller la manda così).
+- Se il controller non compare: Impostazioni → Dati → Informazioni per il supporto → Copia, e manda il testo
+  (c'è una parte "Controller PlayStation" con quello che l'app riceve).
+
+## 0.2.8 — 16/11/2026 (barra di avanzamento per gli aggiornamenti)
+- **Barra di avanzamento**: quando aggiorni l'app compare una finestrella con la barra, quanti MB sono stati
+  scaricati (es. "24,5 MB di 61,2 MB · 40%") e il pulsante **Annulla**. Alla fine scrive "Installo e riavvio
+  l'app…" e riparte da sola, con i tuoi dati.
+- Se annulli (o chiudi la finestrella), non succede niente: l'app resta com'è e il file a metà viene cancellato.
 
 ## 0.2.7 — 16/11/2026 (installer e test automatici)
 - **Installer**: oltre a `BatterieInBarra-0.2.7.exe` (da aprire così com'è) c'è anche

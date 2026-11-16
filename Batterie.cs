@@ -45,6 +45,9 @@ namespace BatterieInBarra
             {
                 AirPods.Ferma();
 
+                // Controller PlayStation col cavo (non sono Bluetooth)
+                await AggiungiPlayStation(collegati, lista, new List<string>());
+
                 // Nessun collegato trovato: proviamo comunque la riserva, ma solo ogni 10 minuti
                 await AggiungiDaRiserva(collegati, lista, new List<string>());
                 return lista;
@@ -81,11 +84,14 @@ namespace BatterieInBarra
                 }
             }
 
-            // 3. Riserva: se un dispositivo collegato non ha ancora la batteria, proviamo il metodo
+            // 3. Controller PlayStation: Windows non sa la batteria, la leggiamo dai dati del controller
+            await AggiungiPlayStation(collegati, lista, nomiVisti);
+
+            // 4. Riserva: se un dispositivo collegato non ha ancora la batteria, proviamo il metodo
             //    della prima versione (PowerShell). Su alcuni PC trova dispositivi che l'altro non vede.
             await AggiungiDaRiserva(collegati, lista, nomiVisti);
 
-            // 4. AirPods e Beats: Windows non sa la batteria, la leggiamo dai messaggi di Apple
+            // 5. AirPods e Beats: Windows non sa la batteria, la leggiamo dai messaggi di Apple
             AggiungiAirPods(collegati, lista, nomiVisti);
 
             return lista;
@@ -215,6 +221,41 @@ ConvertTo-Json -InputObject $lista -Compress
                 Registro.Scrivi("Lettura di riserva non riuscita: " + errore.Message);
             }
             return risultato;
+        }
+
+        // Controller PS4 e PS5: il nome lo prendiamo dal Bluetooth ("Wireless Controller", "DualSense..."),
+        // altrimenti (col cavo) usiamo "Controller PS4" / "Controller PS5"
+        static async Task AggiungiPlayStation(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
+        {
+            List<ControllerTrovato> controller = await PlayStation.Leggi();
+            int numero = 0;
+
+            foreach (ControllerTrovato c in controller)
+            {
+                numero = numero + 1;
+
+                // Cerchiamo il nome Bluetooth giusto
+                string nome = c.EPS5 ? "Controller PS5" : "Controller PS4";
+                foreach (string collegato in collegati.Values)
+                {
+                    string n = collegato.ToLower();
+                    bool somiglia = c.EPS5 ? n.Contains("dualsense") : n.Contains("wireless controller");
+                    if (somiglia && !nomiVisti.Contains(collegato))
+                    {
+                        nome = collegato;
+                        break;
+                    }
+                }
+
+                // Due controller con lo stesso nome: aggiungiamo il numero
+                if (nomiVisti.Contains(nome))
+                {
+                    nome = nome + " " + numero;
+                }
+
+                nomiVisti.Add(nome);
+                lista.Add(new Dispositivo { Nome = nome, Batteria = c.Batteria });
+            }
         }
 
         static void AggiungiAirPods(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
@@ -389,6 +430,18 @@ ConvertTo-Json -InputObject $lista -Compress
             foreach (KeyValuePair<string, int> coppia in riserva)
             {
                 testo.AppendLine("- " + coppia.Key + " | batteria=" + coppia.Value);
+            }
+
+            testo.AppendLine();
+            testo.AppendLine("== Controller PlayStation ==");
+            List<ControllerTrovato> controller = await PlayStation.Leggi();
+            if (controller.Count == 0)
+            {
+                testo.AppendLine("(nessuno)");
+            }
+            foreach (ControllerTrovato c in controller)
+            {
+                testo.AppendLine("- " + (c.EPS5 ? "PS5" : "PS4") + " | batteria=" + c.Batteria);
             }
 
             testo.AppendLine();
