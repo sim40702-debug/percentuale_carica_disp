@@ -1,0 +1,72 @@
+# Quando carichi un tag tipo v0.1.2:
+# 1. GitHub accende un computer Windows
+# 2. mette la versione del tag nell'app (0.1.2)
+# 3. crea l'exe
+# 4. crea la release "Batterie in Barra 0.1.2" con le novità di docs/CHANGELOG.md
+# Si può far partire anche a mano da Actions -> "Crea la release" -> "Run workflow" (usa l'ultimo tag).
+
+name: Crea la release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      # La versione viene dal tag (v0.1.2 -> 0.1.2)
+      - name: Prendi la versione dal tag
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag=$(git describe --tags --abbrev=0)
+          fi
+          v="${tag#v}"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "VERSIONE=$v" >> "$GITHUB_ENV"
+          npm version "$v" --no-git-tag-version --allow-same-version
+
+      - run: npm install
+
+      - name: Crea l'exe
+        run: npx electron-builder --win --publish never
+
+      - name: Pubblica la release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Novità: la sezione "## <versione>" di docs/CHANGELOG.md
+          awk -v h="## $VERSIONE " 'index($0, h) == 1 { f = 1; next } /^## / { if (f) exit } f' docs/CHANGELOG.md > notes.md || true
+          if [ ! -s notes.md ]; then
+            echo "Versione $VERSIONE di Batterie in Barra." > notes.md
+          fi
+
+          list=(dist/*.exe dist/*.blockmap dist/latest.yml)
+          printf '%s\n' "${list[@]}"
+
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" "${list[@]}" --clobber
+            gh release edit "$TAG" --draft=false --title "Batterie in Barra $VERSIONE" --notes-file notes.md
+          else
+            gh release create "$TAG" "${list[@]}" --title "Batterie in Barra $VERSIONE" --notes-file notes.md
+          fi

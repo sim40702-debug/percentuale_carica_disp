@@ -1,6 +1,6 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione sta in package.json).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.1.2).
 La sezione della versione diventa la descrizione della release su GitHub.
 
 ## 0.1.0 — 16/11/2026 (prima versione)
