@@ -533,15 +533,7 @@ namespace BatterieInBarra
                 return false;
             }
 
-            int ora = DateTime.Now.Hour;
-            int dalle = Opzioni.SilenzioDalle;
-            int alle = Opzioni.SilenzioAlle;
-            if (dalle > alle)
-            {
-                // passa la mezzanotte (es. dalle 23 alle 7)
-                return ora >= dalle || ora < alle;
-            }
-            return ora >= dalle && ora < alle;
+            return Impostazioni.OraSilenziosa(DateTime.Now.Hour, Opzioni.SilenzioDalle, Opzioni.SilenzioAlle);
         }
 
         // Manda un avviso adesso, oppure lo tiene da parte se è un momento silenzioso
@@ -951,8 +943,15 @@ namespace BatterieInBarra
             }
 
             // 3. Il programma acceso non si può cancellare da solo:
-            //    chiediamo a Windows di cancellarlo 2 secondi dopo la chiusura
+            //    chiediamo a Windows di cancellarlo 2 secondi dopo la chiusura.
+            //    Se è stata installata con l'installer, usiamo il suo disinstallatore
+            //    (così sparisce anche da "App installate").
+            string disinstallatore = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "unins000.exe");
             string comando = "/c ping -n 3 127.0.0.1 > nul & del /f /q \"" + Environment.ProcessPath + "\"";
+            if (File.Exists(disinstallatore))
+            {
+                comando = "/c ping -n 3 127.0.0.1 > nul & \"" + disinstallatore + "\" /VERYSILENT /SUPPRESSMSGBOXES";
+            }
             ProcessStartInfo cancella = new ProcessStartInfo("cmd.exe", comando);
             cancella.CreateNoWindow = true;
             cancella.UseShellExecute = false;

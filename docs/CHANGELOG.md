@@ -1,7 +1,19 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.6).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.7).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.2.7 — 16/11/2026 (installer e test automatici)
+- **Installer**: oltre a `BatterieInBarra-0.2.7.exe` (da aprire così com'è) c'è anche
+  `BatterieInBarra-Setup-0.2.7.exe`, che installa l'app come un programma normale: niente permessi da
+  amministratore, menu Start, lista "App installate" di Windows e disinstallazione che toglie anche dati e avvio
+  con Windows. L'aggiornamento automatico funziona in tutti e due i casi.
+- **Test automatici**: a ogni modifica GitHub controlla da solo i calcoli dell'app (tempo stimato, durata delle
+  cariche, salute della batteria, lettura delle AirPods, Non disturbare, colori, versioni). Se un test fallisce,
+  la release non esce.
+- "Elimina l'app dal PC" usa il disinstallatore, se l'app è stata installata con l'installer.
+
+**Quale scaricare?** Se è la prima volta: `BatterieInBarra-Setup-0.2.7.exe`. Se hai già l'app, si aggiorna da sola.
 
 ## 0.2.6 — 16/11/2026 (custodia AirPods, Non disturbare, scorciatoia, notifiche cliccabili)
 - **Custodia delle AirPods**: nel widget, sotto le AirPods, compare anche la batteria della custodia (quando le

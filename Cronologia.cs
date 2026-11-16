@@ -52,11 +52,15 @@ namespace BatterieInBarra
             return DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
 
-        // Aggiunge una lettura della batteria
+        // Aggiunge una lettura della batteria (adesso)
         public void AggiungiLettura(string nome, int percentuale)
         {
-            long adesso = Adesso();
+            AggiungiLetturaIn(nome, percentuale, Adesso());
+        }
 
+        // Aggiunge una lettura fatta in un momento preciso (serve soprattutto ai test)
+        public void AggiungiLetturaIn(string nome, int percentuale, long adesso)
+        {
             if (!dati.ContainsKey(nome))
             {
                 dati[nome] = new List<Lettura>();

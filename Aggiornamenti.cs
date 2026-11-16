@@ -54,11 +54,11 @@ namespace BatterieInBarra
                         return null;
                     }
 
-                    // Cerchiamo il file .exe nella release
+                    // Cerchiamo il file dell'app nella release (non l'installer "Setup")
                     foreach (JsonElement file in risposta.RootElement.GetProperty("assets").EnumerateArray())
                     {
                         string nome = file.GetProperty("name").GetString();
-                        if (nome.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                        if (EFileApp(nome))
                         {
                             NuovaVersione nuova = new NuovaVersione();
                             nuova.Versione = versione;
@@ -71,8 +71,15 @@ namespace BatterieInBarra
             return null;
         }
 
+        // È il file dell'app? (es. "BatterieInBarra-0.2.7.exe" sì, "BatterieInBarra-Setup-0.2.7.exe" no)
+        public static bool EFileApp(string nome)
+        {
+            return nome.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+                && nome.IndexOf("setup", StringComparison.OrdinalIgnoreCase) < 0;
+        }
+
         // "0.2.1" è più nuova di "0.2.0"?
-        static bool EPiuNuova(string a, string b)
+        public static bool EPiuNuova(string a, string b)
         {
             Version va;
             Version vb;

@@ -53,10 +53,17 @@ namespace BatterieInBarra
 
         // ----- Salvataggio -----
 
+        // Nei test usiamo un'altra cartella, così i dati veri non vengono toccati
+        public static string CartellaDiProva = null;
+
         // La cartella dei dati dell'app
         public static string Cartella()
         {
             string cartella = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BatterieInBarra");
+            if (CartellaDiProva != null)
+            {
+                cartella = CartellaDiProva;
+            }
             Directory.CreateDirectory(cartella);
             return cartella;
         }
@@ -92,6 +99,17 @@ namespace BatterieInBarra
 
 
         // ----- Comodità -----
+
+        // A quest'ora siamo nel silenzio di "Non disturbare"? (es. dalle 23 alle 7)
+        public static bool OraSilenziosa(int ora, int dalle, int alle)
+        {
+            if (dalle > alle)
+            {
+                // passa la mezzanotte (es. dalle 23 alle 7)
+                return ora >= dalle || ora < alle;
+            }
+            return ora >= dalle && ora < alle;
+        }
 
         // Il nome da mostrare (quello scelto da te, oppure l'originale)
         public string NomeDi(string originale)

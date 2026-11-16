@@ -2,6 +2,7 @@
 bin/
 obj/
 uscita/
+uscita-installer/
 *.exe
 
 # Visual Studio e Rider

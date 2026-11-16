@@ -81,6 +81,42 @@ namespace BatterieInBarra
             }
         }
 
+        // Legge la batteria da un messaggio di Apple. Restituisce null se non è un messaggio delle AirPods.
+        public static LetturaAirPods LeggiMessaggio(byte[] b, short segnale)
+        {
+            // Deve essere un messaggio di tipo "vicinanza" (0x07) abbastanza lungo
+            if (b.Length < 8 || b[0] != 0x07)
+            {
+                return null;
+            }
+
+            int primo = b[6] >> 4;       // un auricolare
+            int secondo = b[6] & 0x0F;   // l'altro auricolare
+            int custodia = b[7] & 0x0F;
+
+            // Prendiamo l'auricolare più scarico (15 = sconosciuto, es. è nella custodia)
+            int auricolari = -1;
+            if (primo <= 10)
+            {
+                auricolari = primo;
+            }
+            if (secondo <= 10 && (auricolari < 0 || secondo < auricolari))
+            {
+                auricolari = secondo;
+            }
+            if (auricolari < 0)
+            {
+                return null;
+            }
+
+            LetturaAirPods lettura = new LetturaAirPods();
+            lettura.Auricolari = auricolari * 10;
+            lettura.Custodia = custodia <= 10 ? custodia * 10 : -1;
+            lettura.Quando = Cronologia.Adesso();
+            lettura.Segnale = segnale;
+            return lettura;
+        }
+
         static void QuandoArrivaMessaggio(BluetoothLEAdvertisementWatcher chi, BluetoothLEAdvertisementReceivedEventArgs messaggio)
         {
             if (messaggio.RawSignalStrengthInDBm < SEGNALE_MINIMO)
@@ -98,36 +134,11 @@ namespace BatterieInBarra
                 byte[] b = new byte[dati.Data.Length];
                 DataReader.FromBuffer(dati.Data).ReadBytes(b);
 
-                // Deve essere un messaggio di tipo "vicinanza" (0x07) abbastanza lungo
-                if (b.Length < 8 || b[0] != 0x07)
+                LetturaAirPods nuova = LeggiMessaggio(b, messaggio.RawSignalStrengthInDBm);
+                if (nuova == null)
                 {
                     continue;
                 }
-
-                int primo = b[6] >> 4;       // un auricolare
-                int secondo = b[6] & 0x0F;   // l'altro auricolare
-                int custodia = b[7] & 0x0F;
-
-                // Prendiamo l'auricolare più scarico (15 = sconosciuto, es. è nella custodia)
-                int auricolari = -1;
-                if (primo <= 10)
-                {
-                    auricolari = primo;
-                }
-                if (secondo <= 10 && (auricolari < 0 || secondo < auricolari))
-                {
-                    auricolari = secondo;
-                }
-                if (auricolari < 0)
-                {
-                    continue;
-                }
-
-                LetturaAirPods nuova = new LetturaAirPods();
-                nuova.Auricolari = auricolari * 10;
-                nuova.Custodia = custodia <= 10 ? custodia * 10 : -1;
-                nuova.Quando = Cronologia.Adesso();
-                nuova.Segnale = messaggio.RawSignalStrengthInDBm;
 
                 lock (lucchetto)
                 {

@@ -1,5 +1,5 @@
-# A ogni push su main GitHub prova a compilare l'app.
-# Se c'è un errore nel codice lo vedi subito in Actions (pallino rosso), prima di fare la release.
+# A ogni push su main GitHub prova a compilare l'app e fa partire i test automatici.
+# Se c'è un errore lo vedi subito in Actions (pallino rosso), prima di fare la release.
 
 name: Controlla che compili
 
@@ -22,3 +22,6 @@ jobs:
 
       - name: Compila
         run: dotnet build BatterieInBarra.csproj -c Release
+
+      - name: Test automatici
+        run: dotnet test Test/BatterieInBarra.Test.csproj -c Release

@@ -308,7 +308,7 @@ ConvertTo-Json -InputObject $lista -Compress
 
         // L'indirizzo (MAC) alla fine di un Id tipo "Bluetooth#Bluetooth00:1a:...-a0:b1:c2:d3:e4:f5"
         // diventa "A0B1C2D3E4F5" (null se non c'è)
-        static string IndirizzoAllaFine(string id)
+        public static string IndirizzoAllaFine(string id)
         {
             Match m = Regex.Match(id.ToUpper(), "([0-9A-F]{2}:){5}[0-9A-F]{2}$");
             if (!m.Success)

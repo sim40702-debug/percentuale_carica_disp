@@ -1,8 +1,9 @@
-# Quando carichi un tag tipo v0.2.0:
+# Quando carichi un tag tipo v0.2.7:
 # 1. GitHub accende un computer Windows
-# 2. compila l'app in C# con la versione del tag (0.2.0)
-# 3. crea un solo file BatterieInBarra-0.2.0.exe (non serve installare niente)
-# 4. crea la release "Batterie in Barra 0.2.0" con le novità di docs/CHANGELOG.md
+# 2. fa partire i test automatici (se uno fallisce, la release non esce)
+# 3. compila l'app in C# con la versione del tag (0.2.7)
+# 4. crea BatterieInBarra-0.2.7.exe (l'app da aprire) e BatterieInBarra-Setup-0.2.7.exe (l'installer)
+# 5. crea la release "Batterie in Barra 0.2.7" con le novità di docs/CHANGELOG.md
 # Si può far partire anche a mano da Actions -> "Crea la release" -> "Run workflow" (usa l'ultimo tag).
 
 name: Crea la release
@@ -33,7 +34,7 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      # La versione viene dal tag (v0.2.0 -> 0.2.0)
+      # La versione viene dal tag (v0.2.7 -> 0.2.7)
       - name: Prendi la versione dal tag
         run: |
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
@@ -43,6 +44,9 @@ jobs:
           fi
           echo "TAG=$tag" >> "$GITHUB_ENV"
           echo "VERSIONE=${tag#v}" >> "$GITHUB_ENV"
+
+      - name: Test automatici
+        run: dotnet test Test/BatterieInBarra.Test.csproj -c Release
 
       - name: Crea l'exe
         run: |
@@ -55,6 +59,12 @@ jobs:
             -o uscita
           cp uscita/BatterieInBarra.exe "BatterieInBarra-$VERSIONE.exe"
 
+      - name: Crea l'installer
+        run: |
+          choco install innosetup -y --no-progress
+          "/c/Program Files (x86)/Inno Setup 6/ISCC.exe" installer.iss
+          ls uscita-installer
+
       - name: Pubblica la release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -65,11 +75,14 @@ jobs:
             echo "Versione $VERSIONE di Batterie in Barra." > notes.md
           fi
 
-          file="BatterieInBarra-$VERSIONE.exe"
+          app="BatterieInBarra-$VERSIONE.exe"
+          installer="uscita-installer/BatterieInBarra-Setup-$VERSIONE.exe"
 
+          # Prima l'app, POI l'installer: le versioni vecchie dell'app prendono il primo .exe della lista
           if gh release view "$TAG" > /dev/null 2>&1; then
-            gh release upload "$TAG" "$file" --clobber
+            gh release upload "$TAG" "$app" --clobber
             gh release edit "$TAG" --draft=false --title "Batterie in Barra $VERSIONE" --notes-file notes.md
           else
-            gh release create "$TAG" "$file" --title "Batterie in Barra $VERSIONE" --notes-file notes.md
+            gh release create "$TAG" "$app" --title "Batterie in Barra $VERSIONE" --notes-file notes.md
           fi
+          gh release upload "$TAG" "$installer" --clobber

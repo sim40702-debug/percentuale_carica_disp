@@ -17,10 +17,18 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
     <!-- Informazioni dell'app (la versione vera la mette GitHub dal tag) -->
-    <Version>0.2.6</Version>
+    <Version>0.2.7</Version>
     <Product>Batterie in Barra</Product>
     <Authors>Simone</Authors>
     <Description>Mini batterie per i dispositivi Bluetooth sulla barra di Windows</Description>
   </PropertyGroup>
+
+  <!-- I test stanno nella cartella Test: non fanno parte dell'app -->
+  <ItemGroup>
+    <Compile Remove="Test\**" />
+    <Page Remove="Test\**" />
+    <None Remove="Test\**" />
+    <EmbeddedResource Remove="Test\**" />
+  </ItemGroup>
 
 </Project>
