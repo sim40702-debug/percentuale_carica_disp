@@ -77,6 +77,12 @@ namespace BatterieInBarra
         [DllImport("user32.dll")]
         static extern int SetWindowLong(IntPtr finestra, int indice, int valore);
 
+        [DllImport("user32.dll")]
+        static extern bool RegisterHotKey(IntPtr finestra, int numero, uint tasti, uint tasto);
+
+        [DllImport("user32.dll")]
+        static extern bool UnregisterHotKey(IntPtr finestra, int numero);
+
         [DllImport("dwmapi.dll")]
         static extern int DwmSetWindowAttribute(IntPtr finestra, int attributo, ref int valore, int grandezza);
 
@@ -199,6 +205,26 @@ namespace BatterieInBarra
                 scala = 1;
             }
             return scala;
+        }
+
+        // ----- Scorciatoia da tastiera (Ctrl + Alt + B) -----
+
+        public const int NUMERO_SCORCIATOIA = 1;
+        public const int WM_HOTKEY = 0x0312;
+        const uint MOD_ALT = 0x0001;
+        const uint MOD_CONTROL = 0x0002;
+        const uint MOD_NOREPEAT = 0x4000;
+        const uint TASTO_B = 0x42;
+
+        // Chiede a Windows di avvisare questa finestra quando premi Ctrl + Alt + B
+        public static bool AttivaScorciatoia(Window finestra)
+        {
+            return RegisterHotKey(Maniglia(finestra), NUMERO_SCORCIATOIA, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, TASTO_B);
+        }
+
+        public static void TogliScorciatoia(Window finestra)
+        {
+            UnregisterHotKey(Maniglia(finestra), NUMERO_SCORCIATOIA);
         }
 
         // Barra del titolo scura (per la finestra Impostazioni)

@@ -10,16 +10,16 @@ Scritta in **C# (WPF, .NET 10)**: leggera, senza PowerShell né browser dentro.
 
 1. Scarica `BatterieInBarra-x.y.z.exe` dalle **Releases**
 2. Mettilo in una cartella fissa (es. Documenti) e aprilo
-3. **Clic** sulle batterie: widget. **Tasto destro**: Aggiorna, Impostazioni, Sposta, Esci
+3. **Clic** sulle batterie (o **Ctrl + Alt + B**): widget. **Tasto destro**: Aggiorna, Impostazioni, Sposta, Esci
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.2.6 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.2.7 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.2.6" && git push && git tag v0.2.6 && git push origin v0.2.6
+   git pull && git add . && git commit -m "Versione 0.2.7" && git push && git tag v0.2.7 && git push origin v0.2.7
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.2.6" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.2.7" con l'exe
 
 A ogni push GitHub controlla anche che il codice compili (Actions → "Controlla che compili").
 

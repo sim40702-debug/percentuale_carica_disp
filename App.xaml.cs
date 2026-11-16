@@ -28,6 +28,16 @@ namespace BatterieInBarra
         public string DurataCarica;       // "Una carica dura circa 18 ore"
         public string CaricheMese;        // "Caricato 5 volte questo mese"
         public bool BatteriaPeggiorata;   // si scarica più in fretta del solito
+        public int Custodia = -1;         // solo AirPods: batteria della custodia (-1 = non si sa)
+    }
+
+    // Un avviso rimandato (perché eri in "Non disturbare")
+    public class AvvisoInAttesa
+    {
+        public string Titolo;
+        public string Testo;
+        public string Dispositivo;
+        public DateTime Quando;
     }
 
     public partial class App : Application
@@ -60,6 +70,8 @@ namespace BatterieInBarra
         double larghezzaBarra = LARGHEZZA_VUOTA;
         DateTime ultimaChiusuraWidget = DateTime.MinValue;
         bool staLeggendo = false;
+        bool schermoInteroAdesso = false;                          // c'è un gioco/video a schermo intero?
+        List<AvvisoInAttesa> avvisiInAttesa = new List<AvvisoInAttesa>();
 
         // Per arrivare all'app da tutte le finestre: App.Corrente
         public static App Corrente
@@ -137,6 +149,12 @@ namespace BatterieInBarra
 
             barra = new BarraWindow();
             widget = new WidgetWindow();
+
+            // Clic su una notifica: apre il widget su quel dispositivo
+            Avvisi.QuandoCliccata = QuandoCliccaNotifica;
+
+            // Scorciatoia Ctrl + Alt + B
+            barra.ImpostaScorciatoia(Opzioni.Scorciatoia);
 
             // Aggiorna le batterie ogni 30 secondi
             DispatcherTimer timerLettura = new DispatcherTimer();
@@ -346,6 +364,17 @@ namespace BatterieInBarra
 
                 Vista v = CreaVistaBase(originale, batteria);
                 v.Nome = Opzioni.NomeDi(originale);
+
+                // AirPods e Beats: anche la batteria della custodia
+                string minuscolo = originale.ToLower();
+                if (minuscolo.Contains("airpods") || minuscolo.Contains("beats"))
+                {
+                    LetturaAirPods airpods = AirPods.Ultima();
+                    if (airpods != null)
+                    {
+                        v.Custodia = airpods.Custodia;
+                    }
+                }
                 v.SullaBarra = !Opzioni.Nascosti.Contains(originale);
                 v.Tempo = cronologia.TempoStimato(originale);
                 vista.Add(v);
@@ -430,7 +459,7 @@ namespace BatterieInBarra
             bool avvisato = giaAvvisati.ContainsKey(originale) && giaAvvisati[originale];
             if (percentuale <= Opzioni.Soglia && !avvisato)
             {
-                Avvisi.Manda(Testi.T("avviso_scarica"), Testi.T("avviso_scarica_testo", nome, percentuale));
+                MandaAvviso(Testi.T("avviso_scarica"), Testi.T("avviso_scarica_testo", nome, percentuale), originale, false);
                 giaAvvisati[originale] = true;
             }
             if (percentuale > Opzioni.Soglia)
@@ -441,7 +470,7 @@ namespace BatterieInBarra
             // Carica completa: prima era sotto 100, adesso è 100
             if (Opzioni.AvvisoCompleta && ultimiValori.ContainsKey(originale) && ultimiValori[originale] < 100 && percentuale == 100)
             {
-                Avvisi.Manda(Testi.T("avviso_completa"), Testi.T("avviso_completa_testo", nome));
+                MandaAvviso(Testi.T("avviso_completa"), Testi.T("avviso_completa_testo", nome), originale, false);
             }
             ultimiValori[originale] = percentuale;
         }
@@ -452,13 +481,15 @@ namespace BatterieInBarra
             if (statistiche.BatteriaPeggiorata(originale) && statistiche.PuoiAvvisareSalute(originale))
             {
                 string nome = originale == Grafica.NOME_PC ? Testi.T("questo_pc") : Opzioni.NomeDi(originale);
-                Avvisi.Manda(Testi.T("avviso_salute"), Testi.T("avviso_salute_testo", nome));
+                MandaAvviso(Testi.T("avviso_salute"), Testi.T("avviso_salute_testo", nome), originale, false);
             }
         }
 
         // Promemoria serale: all'ora scelta, una volta al giorno
         void QuandoTimerPromemoria(object sender, EventArgs e)
         {
+            SvuotaAvvisiInAttesa();
+
             DateTime adesso = DateTime.Now;
             string oggi = adesso.ToString("yyyy-MM-dd");
 
@@ -476,9 +507,106 @@ namespace BatterieInBarra
                 Lettura ultima = cronologia.UltimaLettura(originale);
                 if (ultima != null && ultima.T > unGiornoFa && ultima.P < SOGLIA_PROMEMORIA)
                 {
-                    Avvisi.Manda(Testi.T("avviso_promemoria"),
-                        Testi.T("avviso_promemoria_testo", Opzioni.NomeDi(originale), ultima.P));
+                    // Il promemoria arriva all'ora che hai scelto anche in "Non disturbare" (ma non mentre giochi)
+                    MandaAvviso(Testi.T("avviso_promemoria"),
+                        Testi.T("avviso_promemoria_testo", Opzioni.NomeDi(originale), ultima.P), originale, true);
                 }
+            }
+        }
+
+
+        // ----- Non disturbare -----
+
+        // Siamo in un momento in cui non disturbare? (di notte o mentre giochi)
+        bool MomentoSilenzioso(bool ignoraOrario)
+        {
+            if (!Opzioni.NonDisturbare)
+            {
+                return false;
+            }
+            if (schermoInteroAdesso)
+            {
+                return true;
+            }
+            if (ignoraOrario)
+            {
+                return false;
+            }
+
+            int ora = DateTime.Now.Hour;
+            int dalle = Opzioni.SilenzioDalle;
+            int alle = Opzioni.SilenzioAlle;
+            if (dalle > alle)
+            {
+                // passa la mezzanotte (es. dalle 23 alle 7)
+                return ora >= dalle || ora < alle;
+            }
+            return ora >= dalle && ora < alle;
+        }
+
+        // Manda un avviso adesso, oppure lo tiene da parte se è un momento silenzioso
+        void MandaAvviso(string titolo, string testo, string dispositivo, bool ignoraOrario)
+        {
+            if (!MomentoSilenzioso(ignoraOrario))
+            {
+                Avvisi.Manda(titolo, testo, dispositivo);
+                return;
+            }
+
+            // Lo stesso avviso non lo teniamo due volte
+            foreach (AvvisoInAttesa a in avvisiInAttesa)
+            {
+                if (a.Titolo == titolo && a.Dispositivo == dispositivo)
+                {
+                    a.Testo = testo;
+                    return;
+                }
+            }
+
+            AvvisoInAttesa nuovo = new AvvisoInAttesa();
+            nuovo.Titolo = titolo;
+            nuovo.Testo = testo;
+            nuovo.Dispositivo = dispositivo;
+            nuovo.Quando = DateTime.Now;
+            avvisiInAttesa.Add(nuovo);
+        }
+
+        // Finito il momento silenzioso, mandiamo gli avvisi tenuti da parte (se hanno meno di 12 ore)
+        void SvuotaAvvisiInAttesa()
+        {
+            if (avvisiInAttesa.Count == 0 || MomentoSilenzioso(false))
+            {
+                return;
+            }
+
+            foreach (AvvisoInAttesa a in avvisiInAttesa)
+            {
+                if ((DateTime.Now - a.Quando).TotalHours < 12)
+                {
+                    Avvisi.Manda(a.Titolo, a.Testo, a.Dispositivo);
+                }
+            }
+            avvisiInAttesa.Clear();
+        }
+
+        // Hai cliccato una notifica: apriamo il widget su quel dispositivo
+        // (Windows ci chiama da un altro "thread", quindi passiamo da Dispatcher)
+        void QuandoCliccaNotifica(string dispositivo)
+        {
+            Dispatcher.Invoke(new Action(() => ApriWidgetSu(dispositivo)));
+        }
+
+        void ApriWidgetSu(string dispositivo)
+        {
+            widget.ScegliDispositivo(dispositivo);
+            if (widget.IsVisible)
+            {
+                widget.Activate();
+            }
+            else
+            {
+                ultimaChiusuraWidget = DateTime.MinValue;
+                ApriChiudiWidget();
             }
         }
 
@@ -519,7 +647,8 @@ namespace BatterieInBarra
                 return;
             }
 
-            // Gioco o video a schermo intero: nascondiamo le batterie
+            // Gioco o video a schermo intero: nascondiamo le batterie (e gli avvisi aspettano)
+            schermoInteroAdesso = info.SchermoIntero;
             if (info.SchermoIntero)
             {
                 if (barra.IsVisible)
@@ -648,6 +777,7 @@ namespace BatterieInBarra
         {
             Opzioni.Salva();
             Opzioni.ApplicaAvvioWindows();
+            barra.ImpostaScorciatoia(Opzioni.Scorciatoia);
             MostraTutto();
         }
 
@@ -700,7 +830,7 @@ namespace BatterieInBarra
                     // Avviso una volta sola per ogni versione nuova
                     if (versioneGiaAvvisata != VersioneNuova.Versione)
                     {
-                        Avvisi.Manda(Testi.T("avviso_aggiornamento"), Testi.T("avviso_aggiornamento_testo", VersioneNuova.Versione));
+                        MandaAvviso(Testi.T("avviso_aggiornamento"), Testi.T("avviso_aggiornamento_testo", VersioneNuova.Versione), null, false);
                         versioneGiaAvvisata = VersioneNuova.Versione;
                     }
                 }
@@ -731,8 +861,17 @@ namespace BatterieInBarra
             catch (Exception errore)
             {
                 Registro.Scrivi("Aggiornamento non riuscito: " + errore);
-                MessageBox.Show(Testi.T("errore_aggiornamento") + "\n\n" + errore.Message,
-                    "Batterie in Barra", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                // Proponiamo di scaricarla a mano dalla pagina della release
+                MessageBoxResult risposta = MessageBox.Show(
+                    Testi.T("errore_aggiornamento") + "\n\n" + errore.Message + "\n\n" + Testi.T("apri_pagina_release"),
+                    "Batterie in Barra", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (risposta == MessageBoxResult.Yes)
+                {
+                    ProcessStartInfo pagina = new ProcessStartInfo(Aggiornamenti.PaginaRelease());
+                    pagina.UseShellExecute = true;
+                    Process.Start(pagina);
+                }
                 return;
             }
 

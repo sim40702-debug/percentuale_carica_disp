@@ -110,6 +110,21 @@ namespace BatterieInBarra
         }
 
 
+        // Mostra nel grafico un dispositivo preciso (es. quando clicchi una sua notifica)
+        public void ScegliDispositivo(string originale)
+        {
+            if (originale == null)
+            {
+                return;
+            }
+            dispositivoGrafico = originale;
+            if (ultimaLista.Count > 0)
+            {
+                MostraGrafico();
+            }
+        }
+
+
         // ----- Cerchio con l'anello -----
 
         FrameworkElement CreaCerchio(Vista v)
@@ -190,6 +205,11 @@ namespace BatterieInBarra
 
             TextBlock tempo = new TextBlock();
             tempo.Text = v.Tempo;
+            // AirPods: aggiungiamo la batteria della custodia (se la conosciamo)
+            if (v.Custodia >= 0)
+            {
+                tempo.Text = v.Tempo + " · " + Testi.T("custodia", v.Custodia);
+            }
             tempo.FontSize = 11;
             if (v.InCarica)
             {

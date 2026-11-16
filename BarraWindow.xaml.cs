@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -35,6 +36,41 @@ namespace BatterieInBarra
         void QuandoCreata(object sender, EventArgs e)
         {
             Finestre.RendiNonAttivabile(this);
+
+            // Ascoltiamo i messaggi di Windows per la scorciatoia da tastiera
+            HwndSource sorgente = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+            sorgente.AddHook(QuandoArrivaMessaggio);
+        }
+
+        // Accende o spegne la scorciatoia Ctrl + Alt + B
+        bool scorciatoiaAttiva = false;
+
+        public void ImpostaScorciatoia(bool accesa)
+        {
+            if (accesa && !scorciatoiaAttiva)
+            {
+                scorciatoiaAttiva = Finestre.AttivaScorciatoia(this);
+                if (!scorciatoiaAttiva)
+                {
+                    Registro.Scrivi("Scorciatoia Ctrl+Alt+B già usata da un'altra app");
+                }
+            }
+            if (!accesa && scorciatoiaAttiva)
+            {
+                Finestre.TogliScorciatoia(this);
+                scorciatoiaAttiva = false;
+            }
+        }
+
+        // Windows ci avvisa: è stata premuta la scorciatoia
+        IntPtr QuandoArrivaMessaggio(IntPtr finestra, int messaggio, IntPtr dato1, IntPtr dato2, ref bool gestito)
+        {
+            if (messaggio == Finestre.WM_HOTKEY && dato1.ToInt32() == Finestre.NUMERO_SCORCIATOIA)
+            {
+                App.Corrente.ApriChiudiWidget();
+                gestito = true;
+            }
+            return IntPtr.Zero;
         }
 
 

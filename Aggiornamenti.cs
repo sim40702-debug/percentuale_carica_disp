@@ -24,6 +24,12 @@ namespace BatterieInBarra
         // Il repository GitHub dove ci sono le release (deve essere pubblico)
         const string REPOSITORY = "sim40702-debug/percentuale_carica_disp";
 
+        // La pagina dell'ultima release (per scaricarla a mano se l'aggiornamento automatico non riesce)
+        public static string PaginaRelease()
+        {
+            return "https://github.com/" + REPOSITORY + "/releases/latest";
+        }
+
         // La versione di questa app (es. "0.2.0")
         public static string VersioneAttuale()
         {

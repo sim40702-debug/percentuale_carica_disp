@@ -70,6 +70,7 @@ namespace BatterieInBarra
             { "cariche_mese", new[] { "Caricato {0} volte questo mese", "Charged {0} times this month", "Diesen Monat {0}-mal geladen" } },
             { "salute", new[] { "Si scarica più in fretta del solito: la batteria potrebbe essere vecchia", "Draining faster than usual: the battery might be getting old", "Entlädt sich schneller als sonst: der Akku könnte alt sein" } },
             { "in_carica", new[] { "In carica", "Charging", "Wird geladen" } },
+            { "custodia", new[] { "custodia {0}%", "case {0}%", "Etui {0}%" } },
             { "questo_pc", new[] { "Questo PC", "This PC", "Dieser PC" } },
             { "ore", new[] { "{0} ore", "{0} hours", "{0} Stunden" } },
             { "giorni", new[] { "{0} giorni", "{0} days", "{0} Tage" } },
@@ -103,6 +104,7 @@ namespace BatterieInBarra
             { "stato_disponibile", new[] { "È disponibile la versione {0}", "Version {0} is available", "Version {0} ist verfügbar" } },
             { "stato_errore", new[] { "Non riesco a controllare (sei offline o il repository non è pubblico)", "Can't check (you're offline or the repository isn't public)", "Prüfung nicht möglich (offline oder Repository nicht öffentlich)" } },
             { "errore_generico", new[] { "Batterie in Barra ha avuto un problema (l'app continua a funzionare).\nSe succede di nuovo: Impostazioni → Dati → Informazioni per il supporto → Copia, e manda il testo.", "Batterie in Barra ran into a problem (the app keeps running).\nIf it happens again: Settings → Data → Support information → Copy, and send the text.", "Batterie in Barra hatte ein Problem (die App läuft weiter).\nWenn es wieder passiert: Einstellungen → Daten → Support-Informationen → Kopieren, und den Text senden." } },
+            { "apri_pagina_release", new[] { "Vuoi aprire la pagina per scaricarla a mano? (le impostazioni restano)", "Open the page to download it manually? (your settings are kept)", "Seite öffnen, um sie manuell herunterzuladen? (Einstellungen bleiben erhalten)" } },
             { "errore_aggiornamento", new[] { "Non sono riuscito ad aggiornare l'app.", "The app could not be updated.", "Die App konnte nicht aktualisiert werden." } },
 
             // ----- Impostazioni -----
@@ -136,6 +138,12 @@ namespace BatterieInBarra
             { "promemoria_sotto", new[] { "Se un dispositivo è sotto il 30%, ti ricorda di caricarlo per domani", "If a device is below 30%, reminds you to charge it for tomorrow", "Wenn ein Gerät unter 30% ist, erinnert es dich ans Laden für morgen" } },
             { "ora_promemoria", new[] { "Ora del promemoria", "Reminder time", "Uhrzeit der Erinnerung" } },
 
+            { "non_disturbare", new[] { "Non disturbare", "Do not disturb", "Nicht stören" } },
+            { "non_disturbare_sotto", new[] { "Niente avvisi di notte e mentre giochi a schermo intero: arrivano dopo", "No notifications at night or while gaming in full screen: they arrive later", "Keine Benachrichtigungen nachts oder beim Spielen im Vollbild: sie kommen später" } },
+            { "silenzio_dalle", new[] { "Silenzio dalle", "Quiet from", "Ruhe ab" } },
+            { "silenzio_alle", new[] { "Fino alle", "Until", "Bis" } },
+            { "scorciatoia", new[] { "Scorciatoia Ctrl + Alt + B", "Shortcut Ctrl + Alt + B", "Tastenkürzel Strg + Alt + B" } },
+            { "scorciatoia_sotto", new[] { "Apre e chiude il widget dalla tastiera", "Opens and closes the widget from the keyboard", "Öffnet und schließt das Widget mit der Tastatur" } },
             { "sezione_generale", new[] { "GENERALE", "GENERAL", "ALLGEMEIN" } },
             { "avvio_windows", new[] { "Avvia con Windows", "Start with Windows", "Mit Windows starten" } },
             { "avvio_windows_sotto", new[] { "Parte da sola quando accendi il PC", "Starts automatically when you turn on the PC", "Startet automatisch beim Einschalten des PCs" } },

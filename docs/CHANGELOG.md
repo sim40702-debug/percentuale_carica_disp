@@ -1,7 +1,19 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.5).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.6).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.2.6 — 16/11/2026 (custodia AirPods, Non disturbare, scorciatoia, notifiche cliccabili)
+- **Custodia delle AirPods**: nel widget, sotto le AirPods, compare anche la batteria della custodia (quando le
+  AirPods la mandano, cioè con la custodia aperta e vicina).
+- **Non disturbare**: niente avvisi di notte (scegli tu dalle 22, 23 o 00 fino alle 6, 7 o 8) e mentre giochi o
+  guardi un video a schermo intero. Gli avvisi non si perdono: arrivano appena finisce il silenzio. Il promemoria
+  serale arriva comunque all'ora che hai scelto (ma non durante un gioco).
+- **Scorciatoia Ctrl + Alt + B**: apre e chiude il widget dalla tastiera (si può spegnere nelle Impostazioni).
+- **Notifiche cliccabili**: cliccando un avviso (batteria scarica, carica completa...) si apre il widget su quel
+  dispositivo.
+- **Aggiornamento di riserva**: se l'aggiornamento automatico non riesce, l'app propone di aprire la pagina della
+  release per scaricarla a mano. Da qualsiasi versione C# si passa sempre direttamente all'ultima, tenendo i dati.
 
 ## 0.2.5 — 16/11/2026 (mouse ritrovato, aggiornamento più sicuro, supporto)
 - **Mouse e dispositivi che non comparivano**: su alcuni PC la ricerca nuova non trovava la batteria di qualche

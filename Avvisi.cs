@@ -40,7 +40,11 @@ namespace BatterieInBarra
             }
         }
 
-        public static void Manda(string titolo, string testo)
+        // Cosa fare quando clicchi una notifica (lo decide App): riceve il dispositivo della notifica
+        public static Action<string> QuandoCliccata;
+
+        // Manda una notifica. "dispositivo" (facoltativo): cliccandola si apre il widget su quel dispositivo
+        public static void Manda(string titolo, string testo, string dispositivo = null)
         {
             try
             {
@@ -50,7 +54,15 @@ namespace BatterieInBarra
                 righe[0].AppendChild(xml.CreateTextNode(titolo));
                 righe[1].AppendChild(xml.CreateTextNode(testo));
 
-                ToastNotificationManager.CreateToastNotifier(ID_APP).Show(new ToastNotification(xml));
+                ToastNotification notifica = new ToastNotification(xml);
+                notifica.Activated += (chi, dati) =>
+                {
+                    if (QuandoCliccata != null)
+                    {
+                        QuandoCliccata(dispositivo);
+                    }
+                };
+                ToastNotificationManager.CreateToastNotifier(ID_APP).Show(notifica);
             }
             catch (Exception)
             {

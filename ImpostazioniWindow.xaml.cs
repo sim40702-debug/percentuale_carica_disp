@@ -30,6 +30,8 @@ namespace BatterieInBarra
             PromemoriaSerale.IsChecked = opzioni.PromemoriaSerale;
             AvvioWindows.IsChecked = opzioni.AvvioWindows;
             ControllaAggiornamenti.IsChecked = opzioni.ControllaAggiornamenti;
+            NonDisturbare.IsChecked = opzioni.NonDisturbare;
+            Scorciatoia.IsChecked = opzioni.Scorciatoia;
 
             // Batteria del PC: solo se il PC ha una batteria (portatile)
             if (App.Corrente.PCHaBatteria())
@@ -61,6 +63,13 @@ namespace BatterieInBarra
             Ora21.IsChecked = opzioni.OraPromemoria == 21;
             Ora22.IsChecked = opzioni.OraPromemoria == 22;
             Ora23.IsChecked = opzioni.OraPromemoria == 23;
+
+            Dalle22.IsChecked = opzioni.SilenzioDalle == 22;
+            Dalle23.IsChecked = opzioni.SilenzioDalle == 23;
+            Dalle0.IsChecked = opzioni.SilenzioDalle == 0;
+            Alle6.IsChecked = opzioni.SilenzioAlle == 6;
+            Alle7.IsChecked = opzioni.SilenzioAlle == 7;
+            Alle8.IsChecked = opzioni.SilenzioAlle == 8;
 
             MostraDispositivi();
             MostraAggiornamenti();
@@ -309,6 +318,8 @@ namespace BatterieInBarra
             opzioni.PromemoriaSerale = PromemoriaSerale.IsChecked == true;
             opzioni.AvvioWindows = AvvioWindows.IsChecked == true;
             opzioni.ControllaAggiornamenti = ControllaAggiornamenti.IsChecked == true;
+            opzioni.NonDisturbare = NonDisturbare.IsChecked == true;
+            opzioni.Scorciatoia = Scorciatoia.IsChecked == true;
             if (MostraBatteriaPC.IsEnabled)
             {
                 opzioni.MostraBatteriaPC = MostraBatteriaPC.IsChecked == true;
@@ -368,6 +379,22 @@ namespace BatterieInBarra
             if (Ora22.IsChecked == true) opzioni.OraPromemoria = 22;
             if (Ora23.IsChecked == true) opzioni.OraPromemoria = 23;
             opzioni.UltimoPromemoria = "";   // con l'ora nuova il promemoria può arrivare già oggi
+            App.Corrente.ImpostazioniCambiate();
+        }
+
+
+        void QuandoCambiaSilenzio(object sender, RoutedEventArgs e)
+        {
+            if (staCaricando)
+            {
+                return;
+            }
+            if (Dalle22.IsChecked == true) opzioni.SilenzioDalle = 22;
+            if (Dalle23.IsChecked == true) opzioni.SilenzioDalle = 23;
+            if (Dalle0.IsChecked == true) opzioni.SilenzioDalle = 0;
+            if (Alle6.IsChecked == true) opzioni.SilenzioAlle = 6;
+            if (Alle7.IsChecked == true) opzioni.SilenzioAlle = 7;
+            if (Alle8.IsChecked == true) opzioni.SilenzioAlle = 8;
             App.Corrente.ImpostazioniCambiate();
         }
 

@@ -42,6 +42,14 @@ namespace BatterieInBarra
         // Batteria del PC nel widget (solo sui portatili)
         public bool MostraBatteriaPC { get; set; } = true;
 
+        // Non disturbare: niente avvisi in questi orari e durante i giochi a schermo intero (arrivano dopo)
+        public bool NonDisturbare { get; set; } = true;
+        public int SilenzioDalle { get; set; } = 23;
+        public int SilenzioAlle { get; set; } = 7;
+
+        // Scorciatoia da tastiera Ctrl + Alt + B per aprire il widget
+        public bool Scorciatoia { get; set; } = true;
+
 
         // ----- Salvataggio -----
 
