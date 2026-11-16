@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'">
   <title>Batterie</title>
   <link rel="stylesheet" href="widget.css">
 </head>
@@ -16,11 +16,21 @@
 
     <div class="linea"></div>
 
-    <!-- La lista con nome, percentuale e mini batteria -->
+    <!-- La lista con nome, tempo stimato, percentuale e mini batteria -->
     <div id="lista"></div>
 
     <!-- Messaggio se non c'è nessun dispositivo -->
     <p id="vuoto">Nessun dispositivo collegato.</p>
+
+    <!-- Il grafico delle ultime 24 ore -->
+    <div id="parte-grafico">
+      <div class="linea"></div>
+      <div class="titolo-grafico">
+        <h2>Ultime 24 ore</h2>
+        <div id="scelta-grafico"></div>
+      </div>
+      <div id="grafico"></div>
+    </div>
   </div>
 
   <script src="comune.js"></script>

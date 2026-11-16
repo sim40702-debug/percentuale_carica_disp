@@ -77,6 +77,25 @@ body {
   text-align: right;
 }
 
+/* ----- Solo batteria (senza percentuale) ----- */
+
+body.senza-percentuale .dispositivo {
+  width: 62px;
+}
+
+body.senza-percentuale .percentuale {
+  display: none;
+}
+
+/* Passando col mouse, la percentuale compare al posto dell'icona */
+body.senza-percentuale .dispositivo:hover .icona {
+  display: none;
+}
+
+body.senza-percentuale .dispositivo:hover .percentuale {
+  display: block;
+}
+
 /* Quando non c'è nessun dispositivo: solo l'icona Bluetooth, più chiara */
 .dispositivo.vuoto {
   width: 40px;
@@ -111,4 +130,42 @@ body {
 .carica {
   height: 100%;
   border-radius: 1.5px;
+}
+
+/* ----- Dissolvenza ----- */
+
+.entra {
+  animation: entra 0.35s ease-out;
+}
+
+.esce {
+  animation: esce 0.35s ease-in forwards;
+}
+
+@keyframes entra {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes esce {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Animazioni spente nelle impostazioni */
+body.senza-animazioni .entra,
+body.senza-animazioni .esce {
+  animation: none;
 }

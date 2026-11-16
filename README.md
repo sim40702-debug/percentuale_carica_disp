@@ -20,15 +20,20 @@ Il programma di installazione finisce nella cartella `dist`.
 
 ## I file
 
-- `main.js` - avvia l'app, mette le batterie sulla barra, apre il widget
+- `main.js` - avvia l'app, mette le batterie sulla barra, apre widget e impostazioni
 - `batteria.js` - chiede a Windows la batteria dei dispositivi collegati (con PowerShell)
 - `posizione.js` - controlla dove si trova la barra di Windows e se c'è qualcosa a schermo intero
-- `preload.js` - il ponte tra la barra e main.js per i clic
+- `impostazioni.js` - legge e salva le impostazioni
+- `cronologia.js` - si ricorda la batteria nel tempo (grafico e tempo stimato)
+- `preload.js` - il ponte tra le pagine e main.js
 - `barra.html` / `barra.css` / `barra.js` - le mini batterie sulla barra
-- `widget.html` / `widget.css` / `widget.js` - il widget grande stile Apple
-- `comune.js` - colori e icone usati da barra e widget
+- `widget.html` / `widget.css` / `widget.js` - il widget stile Apple con tempo stimato e grafico
+- `impostazioni.html` / `impostazioni.css` / `pagina-impostazioni.js` - la finestra Impostazioni
+- `comune.js` - colori e icone usati da tutte le pagine
 
 ## Comandi
 
 - **Clic** sulle batterie: apre o chiude il widget
-- **Tasto destro**: Aggiorna ora / Sposta a sinistra / Sposta a destra / Esci
+- **Tasto destro**: Aggiorna ora / Impostazioni / Sposta a sinistra / Sposta a destra / Esci
+
+Le impostazioni e la cronologia vengono salvate nella cartella dei dati dell'app, non nel progetto.
