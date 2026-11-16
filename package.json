@@ -1,6 +1,6 @@
 {
   "name": "batterie-in-barra",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Mini batterie stile Apple vicino all'orologio di Windows",
   "main": "main.js",
   "author": "Simone",
@@ -17,6 +17,10 @@
     "productName": "Batterie in Barra",
     "win": {
       "target": "nsis"
+    },
+    "publish": {
+      "provider": "github",
+      "releaseType": "prerelease"
     }
   }
 }
