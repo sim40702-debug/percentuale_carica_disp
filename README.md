@@ -10,13 +10,16 @@ Mini batterie stile Apple direttamente sulla barra di Windows, a sinistra delle 
 
 Su Mac l'app parte con dei **dati di prova**: le batterie vere si vedono solo su Windows.
 
-## Come creare il file .exe (sul PC Windows)
+## Come pubblicare una versione nuova
 
-```
-npm run crea-exe
-```
+1. Cambia `"version"` in `package.json` (es. `0.1.1`)
+2. Scrivi le novità in `docs/CHANGELOG.md`, in una sezione `## 0.1.1 — data (titolo)`
+3. Fai commit e push, poi carica il tag: `git tag v0.1.1 && git push origin v0.1.1`
 
-Il programma di installazione finisce nella cartella `dist`.
+GitHub crea da solo l'exe e la release "Batterie in Barra 0.1.1" con le novità.
+Si può anche far partire a mano da Actions → "Crea la release" → "Run workflow".
+
+Per creare l'exe sul PC Windows senza GitHub: `npm run crea-exe` (finisce nella cartella `dist`).
 
 ## I file
 

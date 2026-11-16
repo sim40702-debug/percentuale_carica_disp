@@ -1,7 +1,7 @@
 {
   "name": "batterie-in-barra",
   "version": "0.1.0",
-  "description": "Mini batterie stile Apple vicino all'orologio di Windows",
+  "description": "Mini batterie per i dispositivi Bluetooth sulla barra di Windows",
   "main": "main.js",
   "author": "Simone",
   "scripts": {
@@ -19,8 +19,7 @@
       "target": "nsis"
     },
     "publish": {
-      "provider": "github",
-      "releaseType": "prerelease"
+      "provider": "github"
     }
   }
 }
