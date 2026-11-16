@@ -1,8 +1,9 @@
 // Aggiornamenti.cs
-// Controlla su GitHub se c'è una versione nuova, la scarica e sostituisce quella vecchia.
+// Controlla su GitHub se c'è una versione nuova, la scarica e (ad app chiusa) sostituisce quella vecchia.
 // I dati (impostazioni e cronologia) stanno in %APPDATA%\BatterieInBarra: l'aggiornamento non li tocca.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
@@ -76,55 +77,77 @@ namespace BatterieInBarra
             return va > vb;
         }
 
-        // Scarica la versione nuova e la mette al posto di quella vecchia.
-        // Windows non permette di cancellare un programma acceso, ma permette di rinominarlo:
-        // l'exe acceso diventa "BatterieInBarra.vecchio.exe" e lo cancelliamo alla prossima partenza.
-        // La versione nuova si chiama sempre "BatterieInBarra.exe", nella stessa cartella.
-        // Restituisce il percorso della versione nuova (da avviare).
-        public static async Task<string> Installa(NuovaVersione nuova)
+        // Scarica la versione nuova accanto a quella attuale, con il nome "BatterieInBarra.nuovo.exe".
+        // Restituisce il percorso del file scaricato.
+        // (Il cambio vero lo fa un piccolo script DOPO che l'app si è chiusa: vedi PreparaCambio)
+        public static async Task<string> Scarica(NuovaVersione nuova)
         {
-            string attuale = Environment.ProcessPath;
-            string cartella = Path.GetDirectoryName(attuale);
+            string cartella = Path.GetDirectoryName(Environment.ProcessPath);
             string scaricato = Path.Combine(cartella, "BatterieInBarra.nuovo.exe");
-            string vecchio = Path.Combine(cartella, "BatterieInBarra.vecchio.exe");
-            string percorsoNuovo = Path.Combine(cartella, "BatterieInBarra.exe");
 
-            // 1. Scarica
             using (HttpClient internet = CreaClient())
             {
                 byte[] dati = await internet.GetByteArrayAsync(nuova.Indirizzo);
+
+                // Controllo: un exe vero pesa decine di MB, non pochi KB (es. una pagina di errore)
+                if (dati.Length < 1024 * 1024)
+                {
+                    throw new Exception("Il file scaricato è troppo piccolo (" + dati.Length + " byte)");
+                }
                 await File.WriteAllBytesAsync(scaricato, dati);
             }
-
-            // 2. Mette da parte quello vecchio (acceso) e al suo posto quello nuovo
-            if (File.Exists(vecchio))
-            {
-                File.Delete(vecchio);
-            }
-            File.Move(attuale, vecchio);
-            if (File.Exists(percorsoNuovo))
-            {
-                File.Delete(percorsoNuovo);
-            }
-            File.Move(scaricato, percorsoNuovo);
-
-            return percorsoNuovo;
+            return scaricato;
         }
 
-        // Cancella la versione vecchia rimasta dopo un aggiornamento
+        // Prepara e avvia un piccolo script che:
+        // 1. aspetta che questa app si chiuda del tutto
+        // 2. mette la versione nuova al posto di quella vecchia (stesso nome, stessa cartella)
+        // 3. avvia la versione nuova
+        // 4. cancella se stesso
+        // Così non si cambia mai un programma mentre è acceso.
+        public static void PreparaCambio(string scaricato)
+        {
+            string attuale = Environment.ProcessPath;
+            int numeroProcesso = Environment.ProcessId;
+            string script = Path.Combine(Path.GetTempPath(), "BatterieInBarra-aggiorna.cmd");
+
+            string[] righe = new string[]
+            {
+                "@echo off",
+                "chcp 65001 >nul",
+                ":aspetta",
+                "tasklist /fi \"PID eq " + numeroProcesso + "\" | find \" " + numeroProcesso + " \" >nul && (ping -n 2 127.0.0.1 >nul & goto aspetta)",
+                "move /y \"" + scaricato + "\" \"" + attuale + "\" >nul",
+                "start \"\" \"" + attuale + "\" --aggiornato",
+                "del \"%~f0\""
+            };
+            File.WriteAllText(script, string.Join("\r\n", righe) + "\r\n", new System.Text.UTF8Encoding(false));
+
+            ProcessStartInfo avvio = new ProcessStartInfo("cmd.exe", "/c \"" + script + "\"");
+            avvio.CreateNoWindow = true;
+            avvio.UseShellExecute = false;
+            Process.Start(avvio);
+        }
+
+        // Cancella i file rimasti da aggiornamenti vecchi o non finiti
         public static void TogliVersioneVecchia()
         {
-            try
+            string cartella = Path.GetDirectoryName(Environment.ProcessPath);
+            string[] avanzi = new string[] { "BatterieInBarra.vecchio.exe", "BatterieInBarra.nuovo.exe" };
+            foreach (string nome in avanzi)
             {
-                string vecchio = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "BatterieInBarra.vecchio.exe");
-                if (File.Exists(vecchio))
+                try
                 {
-                    File.Delete(vecchio);
+                    string file = Path.Combine(cartella, nome);
+                    if (File.Exists(file) && !string.Equals(file, Environment.ProcessPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Delete(file);
+                    }
                 }
-            }
-            catch (Exception)
-            {
-                // il vecchio programma si sta ancora chiudendo: riproveremo la prossima volta
+                catch (Exception)
+                {
+                    // è ancora in uso: riproveremo la prossima volta
+                }
             }
         }
 

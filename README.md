@@ -14,12 +14,12 @@ Scritta in **C# (WPF, .NET 10)**: leggera, senza PowerShell né browser dentro.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.2.5 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.2.6 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.2.5" && git push && git tag v0.2.5 && git push origin v0.2.5
+   git pull && git add . && git commit -m "Versione 0.2.6" && git push && git tag v0.2.6 && git push origin v0.2.6
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.2.5" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.2.6" con l'exe
 
 A ogni push GitHub controlla anche che il codice compili (Actions → "Controlla che compili").
 
@@ -38,6 +38,7 @@ L'app installata cerca da sola le versioni nuove nelle Releases di questo reposi
 - `AirPods.cs` - legge la batteria di AirPods e Beats dai messaggi Bluetooth di Apple
 - `Avvisi.cs` - le notifiche di Windows
 - `Aggiornamenti.cs` - cerca le versioni nuove su GitHub e le installa
+- `Registro.cs` - il registro dell'app (avvii, aggiornamenti, errori)
 - `Grafica.cs` - colori, tema chiaro/scuro, icone e mini batterie
 - `BarraWindow` - le mini batterie sulla barra
 - `WidgetWindow` - il widget con cerchi, lista e grafico

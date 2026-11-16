@@ -1,16 +1,29 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.4).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.5).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.2.5 — 16/11/2026 (mouse ritrovato, aggiornamento più sicuro, supporto)
+- **Mouse e dispositivi che non comparivano**: su alcuni PC la ricerca nuova non trovava la batteria di qualche
+  dispositivo (es. il mouse) che la prima versione invece vedeva. Adesso, solo se manca qualcuno, l'app usa come
+  riserva il metodo della prima versione (al massimo ogni 2 minuti, così resta leggera).
+- **Ricerca dei dispositivi collegati più sicura**: si cercano in due modi diversi (se uno non funziona, c'è l'altro).
+- **Aggiornamento automatico più sicuro**: prima l'app cambiava il proprio file mentre era ancora accesa, e su
+  alcuni PC si chiudeva senza ripartire. Adesso scarica la versione nuova, si chiude, e solo dopo un piccolo script
+  la mette al suo posto (stesso nome, stessa cartella) e la riavvia.
+- **Registro degli errori**: se qualcosa va storto l'app non si chiude più in silenzio, mostra un messaggio e lo
+  scrive nel registro.
+- **Informazioni per il supporto** (Impostazioni → Dati → Copia): copia cosa vede l'app (dispositivi, batterie,
+  registro), da mandare se un dispositivo non compare.
+
+**Se hai la 0.2.3 o la 0.2.4 e l'aggiornamento automatico si chiude senza ripartire**: scarica una volta
+`BatterieInBarra-0.2.5.exe` qui sotto e aprilo (le impostazioni restano). Dalla 0.2.5 in poi l'aggiornamento
+usa il metodo nuovo.
 
 ## 0.2.4 — 16/11/2026 (AirPods e Impostazioni più facili)
 - **AirPods e cuffie Beats**: adesso compaiono anche loro. Windows non conosce la loro batteria, quindi l'app la
   legge dai messaggi Bluetooth che mandano le AirPods (come le app apposta per AirPods). La percentuale va a scatti
   di 10% ed è quella dell'auricolare più scarico. Se è appena partita, aspetta fino a un minuto.
-- **Ricerca dei dispositivi più sicura**: i dispositivi collegati si trovano in due modi diversi (se uno non
-  funziona su quel PC, c'è l'altro).
-- **Informazioni per il supporto** (Impostazioni → Dati → Copia): copia cosa vede l'app, da mandare se un
-  dispositivo non compare.
 - **Impostazioni più facili da trovare**: se l'app è già aperta e riapri `BatterieInBarra.exe`, si aprono le
   Impostazioni. Alla prima apertura un avviso spiega dove cliccare (clic = widget, tasto destro = menu).
 

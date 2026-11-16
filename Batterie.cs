@@ -1,11 +1,14 @@
 // Batterie.cs
 // Chiede a Windows la batteria dei dispositivi Bluetooth COLLEGATI.
-// Usa direttamente le funzioni di Windows (niente PowerShell): è molto più leggero.
+// Usa direttamente le funzioni di Windows: è molto più leggero.
+// Solo se un dispositivo collegato non si trova così, usa come riserva il metodo della prima versione (PowerShell).
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
@@ -41,6 +44,9 @@ namespace BatterieInBarra
             if (collegati.Count == 0)
             {
                 AirPods.Ferma();
+
+                // Nessun collegato trovato: proviamo comunque la riserva, ma solo ogni 10 minuti
+                await AggiungiDaRiserva(collegati, lista, new List<string>());
                 return lista;
             }
 
@@ -75,10 +81,140 @@ namespace BatterieInBarra
                 }
             }
 
-            // 3. AirPods e Beats: Windows non sa la batteria, la leggiamo dai messaggi di Apple
+            // 3. Riserva: se un dispositivo collegato non ha ancora la batteria, proviamo il metodo
+            //    della prima versione (PowerShell). Su alcuni PC trova dispositivi che l'altro non vede.
+            await AggiungiDaRiserva(collegati, lista, nomiVisti);
+
+            // 4. AirPods e Beats: Windows non sa la batteria, la leggiamo dai messaggi di Apple
             AggiungiAirPods(collegati, lista, nomiVisti);
 
             return lista;
+        }
+
+        // ----- Lettura di riserva (il metodo della prima versione, con PowerShell) -----
+
+        const long OGNI_QUANTO_RISERVA = 2 * 60 * 1000;   // al massimo ogni 2 minuti
+        static long ultimaRiserva = 0;
+        static Dictionary<string, int> risultatiRiserva = new Dictionary<string, int>();
+
+        // Lo stesso comando che usava la versione in Electron (che su quel PC trovava il mouse)
+        const string COMANDO_RISERVA = @"
+$CHIAVE_COLLEGATO = '{83DA6326-97A6-4088-9453-A1923F573B29} 15'
+$CHIAVE_BATTERIA = '{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2'
+$collegati = @{}
+foreach ($d in Get-PnpDevice -Class Bluetooth) {
+  if ($d.InstanceId -match 'DEV_([0-9A-F]{12})') {
+    $indirizzo = $Matches[1]
+    $stato = (Get-PnpDeviceProperty -InstanceId $d.InstanceId -KeyName $CHIAVE_COLLEGATO -ErrorAction SilentlyContinue).Data
+    if ($stato -eq $true) { $collegati[$indirizzo] = $d.FriendlyName }
+  }
+}
+$lista = @()
+if ($collegati.Count -gt 0) {
+  foreach ($d in Get-PnpDevice | Where-Object { $_.InstanceId -like 'BTH*' }) {
+    $batteria = (Get-PnpDeviceProperty -InstanceId $d.InstanceId -KeyName $CHIAVE_BATTERIA -ErrorAction SilentlyContinue).Data
+    if ($batteria -ne $null) {
+      foreach ($indirizzo in $collegati.Keys) {
+        if ($d.InstanceId -like ""*$indirizzo*"") {
+          $lista += [PSCustomObject]@{ nome = $collegati[$indirizzo]; batteria = [int]$batteria }
+        }
+      }
+    }
+  }
+}
+ConvertTo-Json -InputObject $lista -Compress
+";
+
+        static async Task AggiungiDaRiserva(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
+        {
+            // Quali dispositivi collegati non hanno ancora la batteria? (AirPods e Beats a parte)
+            // Se non abbiamo trovato nessun collegato, proviamo lo stesso (ma più di rado)
+            bool mancaQualcuno = collegati.Count == 0;
+            foreach (string nome in collegati.Values)
+            {
+                string n = nome.ToLower();
+                if (!nomiVisti.Contains(nome) && !n.Contains("airpods") && !n.Contains("beats"))
+                {
+                    mancaQualcuno = true;
+                }
+            }
+            if (!mancaQualcuno)
+            {
+                return;
+            }
+
+            // Rifacciamo la lettura solo ogni 2 minuti (ogni 10 se non c'è nessun collegato): PowerShell pesa un po'
+            long intervallo = collegati.Count == 0 ? 5 * OGNI_QUANTO_RISERVA : OGNI_QUANTO_RISERVA;
+            if (Cronologia.Adesso() - ultimaRiserva > intervallo)
+            {
+                ultimaRiserva = Cronologia.Adesso();
+                risultatiRiserva = await LeggiConPowerShell();
+            }
+
+            foreach (KeyValuePair<string, int> coppia in risultatiRiserva)
+            {
+                // (PowerShell controlla già da solo che il dispositivo sia collegato)
+                if (!nomiVisti.Contains(coppia.Key))
+                {
+                    nomiVisti.Add(coppia.Key);
+                    lista.Add(new Dispositivo { Nome = coppia.Key, Batteria = coppia.Value });
+                }
+            }
+        }
+
+        // Esegue il comando PowerShell e restituisce nome -> batteria
+        public static async Task<Dictionary<string, int>> LeggiConPowerShell()
+        {
+            Dictionary<string, int> risultato = new Dictionary<string, int>();
+            try
+            {
+                // PowerShell vuole il comando "codificato" quando è su più righe
+                string codificato = Convert.ToBase64String(Encoding.Unicode.GetBytes(COMANDO_RISERVA));
+
+                ProcessStartInfo avvio = new ProcessStartInfo("powershell.exe",
+                    "-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand " + codificato);
+                avvio.CreateNoWindow = true;
+                avvio.UseShellExecute = false;
+                avvio.RedirectStandardOutput = true;
+
+                using (Process powershell = Process.Start(avvio))
+                {
+                    Task<string> uscita = powershell.StandardOutput.ReadToEndAsync();
+                    Task finito = Task.WhenAll(uscita, powershell.WaitForExitAsync());
+
+                    // Al massimo 30 secondi
+                    if (await Task.WhenAny(finito, Task.Delay(30000)) != finito)
+                    {
+                        powershell.Kill();
+                        Registro.Scrivi("Lettura di riserva: PowerShell troppo lento, fermato");
+                        return risultato;
+                    }
+
+                    string testo = uscita.Result.Trim();
+                    if (testo == "")
+                    {
+                        return risultato;
+                    }
+
+                    using (JsonDocument json = JsonDocument.Parse(testo))
+                    {
+                        foreach (JsonElement elemento in json.RootElement.EnumerateArray())
+                        {
+                            string nome = elemento.GetProperty("nome").GetString();
+                            int batteria = elemento.GetProperty("batteria").GetInt32();
+                            if (nome != null && !risultato.ContainsKey(nome))
+                            {
+                                risultato[nome] = batteria;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception errore)
+            {
+                Registro.Scrivi("Lettura di riserva non riuscita: " + errore.Message);
+            }
+            return risultato;
         }
 
         static void AggiungiAirPods(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
@@ -244,6 +380,18 @@ namespace BatterieInBarra
             }
 
             testo.AppendLine();
+            testo.AppendLine("== Lettura di riserva (PowerShell) ==");
+            Dictionary<string, int> riserva = await LeggiConPowerShell();
+            if (riserva.Count == 0)
+            {
+                testo.AppendLine("(niente)");
+            }
+            foreach (KeyValuePair<string, int> coppia in riserva)
+            {
+                testo.AppendLine("- " + coppia.Key + " | batteria=" + coppia.Value);
+            }
+
+            testo.AppendLine();
             LetturaAirPods airpods = AirPods.Ultima();
             if (airpods != null)
             {
@@ -256,6 +404,10 @@ namespace BatterieInBarra
 
             StatoBatteriaPC pc = BatteriaPC.Leggi();
             testo.AppendLine("Batteria PC: " + (pc == null ? "nessuna" : pc.Percentuale + "%"));
+
+            testo.AppendLine();
+            testo.AppendLine("== Registro (ultime 40 righe) ==");
+            testo.AppendLine(Registro.Ultime(40));
             return testo.ToString();
         }
 

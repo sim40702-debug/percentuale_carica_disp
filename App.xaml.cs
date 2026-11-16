@@ -74,6 +74,11 @@ namespace BatterieInBarra
         {
             base.OnStartup(e);
 
+            // Se succede un errore, non chiudiamoci in silenzio: lo scriviamo nel registro e lo mostriamo
+            DispatcherUnhandledException += QuandoErrore;
+            AppDomain.CurrentDomain.UnhandledException += QuandoErroreGrave;
+            Registro.Scrivi("Avvio versione " + Aggiornamenti.VersioneAttuale() + " " + string.Join(" ", e.Args));
+
             // Siamo appena stati aggiornati? (la versione vecchia ci avvia con "--aggiornato")
             bool dopoAggiornamento = Array.IndexOf(e.Args, "--aggiornato") >= 0;
 
@@ -161,6 +166,30 @@ namespace BatterieInBarra
             MostraTutto();
             QuandoTimerLettura(null, null);
             PrimoControllo();
+        }
+
+        // Errore nelle finestre: lo scriviamo, lo mostriamo e l'app continua
+        bool erroreGiaMostrato = false;
+
+        void QuandoErrore(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            Registro.Scrivi("ERRORE: " + e.Exception);
+            e.Handled = true;
+
+            // Il messaggio lo mostriamo una volta sola (se l'errore si ripete non ti riempiamo lo schermo)
+            if (erroreGiaMostrato)
+            {
+                return;
+            }
+            erroreGiaMostrato = true;
+            MessageBox.Show(Testi.T("errore_generico") + "\n\n" + e.Exception.Message,
+                "Batterie in Barra", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        // Errore grave (l'app si chiuderà): almeno lo scriviamo nel registro
+        void QuandoErroreGrave(object sender, UnhandledExceptionEventArgs e)
+        {
+            Registro.Scrivi("ERRORE GRAVE: " + e.ExceptionObject);
         }
 
         // Gira in sottofondo: quando l'exe viene riaperto, apre le Impostazioni
@@ -684,7 +713,7 @@ namespace BatterieInBarra
             barra.MostraAggiornamento(VersioneNuova);
         }
 
-        // Scarica la versione nuova, la mette al posto di quella vecchia e riparte
+        // Scarica la versione nuova; poi uno script la mette al posto di questa (ad app chiusa) e la riavvia
         public async Task InstallaAggiornamento()
         {
             if (VersioneNuova == null)
@@ -692,24 +721,22 @@ namespace BatterieInBarra
                 return;
             }
 
-            string percorsoNuovo;
             try
             {
-                percorsoNuovo = await Aggiornamenti.Installa(VersioneNuova);
+                Registro.Scrivi("Aggiornamento: scarico la versione " + VersioneNuova.Versione);
+                string scaricato = await Aggiornamenti.Scarica(VersioneNuova);
+                Registro.Scrivi("Aggiornamento: scaricato, avvio il cambio");
+                Aggiornamenti.PreparaCambio(scaricato);
             }
             catch (Exception errore)
             {
+                Registro.Scrivi("Aggiornamento non riuscito: " + errore);
                 MessageBox.Show(Testi.T("errore_aggiornamento") + "\n\n" + errore.Message,
                     "Batterie in Barra", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Lasciamo il posto alla versione nuova e la avviamo
-            // (all'avvio la versione nuova aggiorna da sola il percorso per "Avvia con Windows")
-            unaSolaCopia.ReleaseMutex();
-            ProcessStartInfo avvio = new ProcessStartInfo(percorsoNuovo, "--aggiornato");
-            avvio.UseShellExecute = true;
-            Process.Start(avvio);
+            // Ci chiudiamo: lo script aspetta questo momento per fare il cambio
             Shutdown();
         }
 
@@ -786,7 +813,7 @@ namespace BatterieInBarra
 
             // 3. Il programma acceso non si può cancellare da solo:
             //    chiediamo a Windows di cancellarlo 2 secondi dopo la chiusura
-            string comando = "/c timeout /t 2 /nobreak > nul & del /f /q \"" + Environment.ProcessPath + "\"";
+            string comando = "/c ping -n 3 127.0.0.1 > nul & del /f /q \"" + Environment.ProcessPath + "\"";
             ProcessStartInfo cancella = new ProcessStartInfo("cmd.exe", comando);
             cancella.CreateNoWindow = true;
             cancella.UseShellExecute = false;

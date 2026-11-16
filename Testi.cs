@@ -102,6 +102,7 @@ namespace BatterieInBarra
             { "stato_ultima", new[] { "Hai l'ultima versione", "You have the latest version", "Du hast die neueste Version" } },
             { "stato_disponibile", new[] { "È disponibile la versione {0}", "Version {0} is available", "Version {0} ist verfügbar" } },
             { "stato_errore", new[] { "Non riesco a controllare (sei offline o il repository non è pubblico)", "Can't check (you're offline or the repository isn't public)", "Prüfung nicht möglich (offline oder Repository nicht öffentlich)" } },
+            { "errore_generico", new[] { "Batterie in Barra ha avuto un problema (l'app continua a funzionare).\nSe succede di nuovo: Impostazioni → Dati → Informazioni per il supporto → Copia, e manda il testo.", "Batterie in Barra ran into a problem (the app keeps running).\nIf it happens again: Settings → Data → Support information → Copy, and send the text.", "Batterie in Barra hatte ein Problem (die App läuft weiter).\nWenn es wieder passiert: Einstellungen → Daten → Support-Informationen → Kopieren, und den Text senden." } },
             { "errore_aggiornamento", new[] { "Non sono riuscito ad aggiornare l'app.", "The app could not be updated.", "Die App konnte nicht aktualisiert werden." } },
 
             // ----- Impostazioni -----
