@@ -1,42 +1,46 @@
 # Batterie in Barra
 
-Mini batterie stile Apple direttamente sulla barra di Windows, a sinistra delle icone vicino all'orologio, con un widget che si apre al clic.
+Mini batterie per cuffie, tastiera, mouse e controller Bluetooth **direttamente sulla barra di Windows**,
+a sinistra delle icone vicino all'orologio. Con un clic si apre un widget con cerchi, tempo stimato e grafico
+delle ultime 24 ore.
 
-## Come provarla
+Scritta in **C# (WPF, .NET 10)**: leggera, senza PowerShell né browser dentro.
 
-1. Apri la cartella in VS Code
-2. Nel terminale scrivi `npm install`
-3. Poi `npm start`
+## Come si usa
 
-Su Mac l'app parte con dei **dati di prova**: le batterie vere si vedono solo su Windows.
+1. Scarica `BatterieInBarra-x.y.z.exe` dalle **Releases**
+2. Mettilo in una cartella fissa (es. Documenti) e aprilo
+3. **Clic** sulle batterie: widget. **Tasto destro**: Aggiorna, Impostazioni, Sposta, Esci
 
 ## Come pubblicare una versione nuova
 
-1. Cambia `"version"` in `package.json` (es. `0.1.1`)
-2. Scrivi le novità in `docs/CHANGELOG.md`, in una sezione `## 0.1.1 — data (titolo)`
-3. Fai commit e push, poi carica il tag: `git tag v0.1.1 && git push origin v0.1.1`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.2.1 — data (titolo)`
+2. Dal terminale:
+   ```
+   git pull && git add . && git commit -m "Versione 0.2.1" && git push && git tag v0.2.1 && git push origin v0.2.1
+   ```
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.2.1" con l'exe
 
-GitHub crea da solo l'exe e la release "Batterie in Barra 0.1.1" con le novità.
-Si può anche far partire a mano da Actions → "Crea la release" → "Run workflow".
-
-Per creare l'exe sul PC Windows senza GitHub: `npm run crea-exe` (finisce nella cartella `dist`).
+A ogni push GitHub controlla anche che il codice compili (Actions → "Controlla che compili").
 
 ## I file
 
-- `main.js` - avvia l'app, mette le batterie sulla barra, apre widget e impostazioni
-- `batteria.js` - chiede a Windows la batteria dei dispositivi collegati (con PowerShell)
-- `posizione.js` - controlla dove si trova la barra di Windows e se c'è qualcosa a schermo intero
-- `impostazioni.js` - legge e salva le impostazioni
-- `cronologia.js` - si ricorda la batteria nel tempo (grafico e tempo stimato)
-- `preload.js` - il ponte tra le pagine e main.js
-- `barra.html` / `barra.css` / `barra.js` - le mini batterie sulla barra
-- `widget.html` / `widget.css` / `widget.js` - il widget stile Apple con tempo stimato e grafico
-- `impostazioni.html` / `impostazioni.css` / `pagina-impostazioni.js` - la finestra Impostazioni
-- `comune.js` - colori e icone usati da tutte le pagine
+- `App.xaml.cs` - il cervello: legge le batterie, aggiorna barra e widget, avvisi
+- `Batterie.cs` - chiede a Windows la batteria dei dispositivi Bluetooth collegati
+- `Finestre.cs` - funzioni di Windows: posizione della barra, schermo intero, finestre sempre davanti
+- `Impostazioni.cs` - legge e salva le impostazioni
+- `Cronologia.cs` - si ricorda la batteria nel tempo (grafico e tempo stimato)
+- `Avvisi.cs` - le notifiche di Windows
+- `Grafica.cs` - colori, tema chiaro/scuro, icone e mini batterie
+- `BarraWindow` - le mini batterie sulla barra
+- `WidgetWindow` - il widget con cerchi, lista e grafico
+- `ImpostazioniWindow` - la finestra Impostazioni
 
-## Comandi
+Le impostazioni e la cronologia vengono salvate in `%APPDATA%\BatterieInBarra`.
 
-- **Clic** sulle batterie: apre o chiude il widget
-- **Tasto destro**: Aggiorna ora / Impostazioni / Sposta a sinistra / Sposta a destra / Esci
+## Compilare sul PC Windows (facoltativo)
 
-Le impostazioni e la cronologia vengono salvate nella cartella dei dati dell'app, non nel progetto.
+Serve il .NET 10 SDK. Poi nella cartella del progetto:
+```
+dotnet run
+```

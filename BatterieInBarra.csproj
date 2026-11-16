@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- App Windows con finestre (WPF), senza console -->
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+
+    <!-- .NET 10 con le funzioni di Windows 10/11 (batterie, notifiche) -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <AssemblyName>BatterieInBarra</AssemblyName>
+    <RootNamespace>BatterieInBarra</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Informazioni dell'app (la versione vera la mette GitHub dal tag) -->
+    <Version>0.2.0</Version>
+    <Product>Batterie in Barra</Product>
+    <Authors>Simone</Authors>
+    <Description>Mini batterie per i dispositivi Bluetooth sulla barra di Windows</Description>
+  </PropertyGroup>
+
+</Project>

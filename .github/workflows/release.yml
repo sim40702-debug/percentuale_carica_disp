@@ -1,8 +1,8 @@
-# Quando carichi un tag tipo v0.1.2:
+# Quando carichi un tag tipo v0.2.0:
 # 1. GitHub accende un computer Windows
-# 2. mette la versione del tag nell'app (0.1.2)
-# 3. crea l'exe
-# 4. crea la release "Batterie in Barra 0.1.2" con le novità di docs/CHANGELOG.md
+# 2. compila l'app in C# con la versione del tag (0.2.0)
+# 3. crea un solo file BatterieInBarra-0.2.0.exe (non serve installare niente)
+# 4. crea la release "Batterie in Barra 0.2.0" con le novità di docs/CHANGELOG.md
 # Si può far partire anche a mano da Actions -> "Crea la release" -> "Run workflow" (usa l'ultimo tag).
 
 name: Crea la release
@@ -29,11 +29,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          node-version: "lts/*"
+          dotnet-version: "10.0.x"
 
-      # La versione viene dal tag (v0.1.2 -> 0.1.2)
+      # La versione viene dal tag (v0.2.0 -> 0.2.0)
       - name: Prendi la versione dal tag
         run: |
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
@@ -41,15 +41,19 @@ jobs:
           else
             tag=$(git describe --tags --abbrev=0)
           fi
-          v="${tag#v}"
           echo "TAG=$tag" >> "$GITHUB_ENV"
-          echo "VERSIONE=$v" >> "$GITHUB_ENV"
-          npm version "$v" --no-git-tag-version --allow-same-version
-
-      - run: npm install
+          echo "VERSIONE=${tag#v}" >> "$GITHUB_ENV"
 
       - name: Crea l'exe
-        run: npx electron-builder --win --publish never
+        run: |
+          dotnet publish BatterieInBarra.csproj -c Release -r win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:EnableCompressionInSingleFile=true \
+            -p:Version=$VERSIONE \
+            -o uscita
+          cp uscita/BatterieInBarra.exe "BatterieInBarra-$VERSIONE.exe"
 
       - name: Pubblica la release
         env:
@@ -61,12 +65,11 @@ jobs:
             echo "Versione $VERSIONE di Batterie in Barra." > notes.md
           fi
 
-          list=(dist/*.exe dist/*.blockmap dist/latest.yml)
-          printf '%s\n' "${list[@]}"
+          file="BatterieInBarra-$VERSIONE.exe"
 
           if gh release view "$TAG" > /dev/null 2>&1; then
-            gh release upload "$TAG" "${list[@]}" --clobber
+            gh release upload "$TAG" "$file" --clobber
             gh release edit "$TAG" --draft=false --title "Batterie in Barra $VERSIONE" --notes-file notes.md
           else
-            gh release create "$TAG" "${list[@]}" --title "Batterie in Barra $VERSIONE" --notes-file notes.md
+            gh release create "$TAG" "$file" --title "Batterie in Barra $VERSIONE" --notes-file notes.md
           fi

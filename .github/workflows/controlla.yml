@@ -1,0 +1,24 @@
+# A ogni push su main GitHub prova a compilare l'app.
+# Se c'è un errore nel codice lo vedi subito in Actions (pallino rosso), prima di fare la release.
+
+name: Controlla che compili
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Compila
+        run: dotnet build BatterieInBarra.csproj -c Release

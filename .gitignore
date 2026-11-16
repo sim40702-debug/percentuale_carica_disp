@@ -1,17 +1,18 @@
-# Pacchetti installati con npm install (si riscaricano sempre)
-node_modules/
+# File creati quando compili (si ricreano sempre)
+bin/
+obj/
+uscita/
+*.exe
 
-# Programma di installazione creato con npm run crea-exe
-dist/
+# Visual Studio e Rider
+.vs/
+.idea/
+*.user
 
-# File di log
-npm-debug.log*
-*.log
+# Impostazioni di VS Code
+.vscode/
 
 # File creati da Mac e Windows
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# Impostazioni di VS Code
-.vscode/
