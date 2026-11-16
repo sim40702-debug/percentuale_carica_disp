@@ -1,9 +1,0 @@
-directories:
-  output: dist
-  buildResources: build
-appId: ch.simone.batterieinbarra
-productName: Batterie in Barra
-win:
-  target: nsis
-files: []
-electronVersion: 45.3.1

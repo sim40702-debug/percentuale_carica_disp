@@ -232,7 +232,7 @@ namespace BatterieInBarra
             numero.VerticalAlignment = VerticalAlignment.Center;
             numero.Margin = new Thickness(10, 0, 10, 0);
 
-            FrameworkElement batteria = Grafica.CreaMiniBatteria(v.Batteria, 30, 14, bordoBatteria);
+            FrameworkElement batteria = Grafica.CreaMiniBatteria(v.Batteria, 30, 14, bordoBatteria, v.InCarica);
 
             Grid.SetColumn(testi, 0);
             Grid.SetColumn(numero, 1);

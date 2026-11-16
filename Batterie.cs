@@ -21,6 +21,8 @@ namespace BatterieInBarra
     {
         public string Nome;      // nome originale (es. "WH-1000XM5")
         public int Batteria;     // percentuale (0-100)
+        public bool SaSeCarica;  // il dispositivo ci dice se è in carica? (controller PlayStation e AirPods sì)
+        public bool InCarica;    // si sta caricando (vale solo se SaSeCarica è true)
     }
 
     public static class Batterie
@@ -254,7 +256,7 @@ ConvertTo-Json -InputObject $lista -Compress
                 }
 
                 nomiVisti.Add(nome);
-                lista.Add(new Dispositivo { Nome = nome, Batteria = c.Batteria });
+                lista.Add(new Dispositivo { Nome = nome, Batteria = c.Batteria, SaSeCarica = true, InCarica = c.InCarica });
             }
         }
 
@@ -276,7 +278,7 @@ ConvertTo-Json -InputObject $lista -Compress
                 if (lettura != null)
                 {
                     nomiVisti.Add(nome);
-                    lista.Add(new Dispositivo { Nome = nome, Batteria = lettura.Auricolari });
+                    lista.Add(new Dispositivo { Nome = nome, Batteria = lettura.Auricolari, SaSeCarica = true, InCarica = lettura.InCarica });
                 }
             }
 
@@ -441,7 +443,7 @@ ConvertTo-Json -InputObject $lista -Compress
             }
             foreach (ControllerTrovato c in controller)
             {
-                testo.AppendLine("- " + (c.EPS5 ? "PS5" : "PS4") + " | batteria=" + c.Batteria);
+                testo.AppendLine("- " + (c.EPS5 ? "PS5" : "PS4") + " | batteria=" + c.Batteria + " | in carica=" + c.InCarica);
             }
 
             testo.AppendLine();

@@ -8,6 +8,7 @@
 //   cifra bassa = livello, bit 0x10 = attaccato al cavo (livello 0-11 col cavo, 0-8 senza)
 // - PS5 via cavo (rapporto 0x01): byte 53     - PS5 via Bluetooth (rapporto 0x31): byte 54
 //   cifra bassa = livello 0-10, cifra alta = 0 a batteria, 1 in carica, 2 carica completa
+// - PS4 in carica: attaccato al cavo e livello sotto 11 (11 = carica completa)
 
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace BatterieInBarra
     {
         public bool EPS5;        // true = DualSense (PS5), false = DualShock 4 (PS4)
         public int Batteria;     // percentuale
+        public bool InCarica;    // attaccato al cavo e si sta caricando
     }
 
     public static class PlayStation
@@ -109,10 +111,10 @@ namespace BatterieInBarra
                 string filtro = HidDevice.GetDeviceSelector(PAGINA_COMANDI, GAMEPAD, SONY, modello);
                 foreach (DeviceInformation d in await DeviceInformation.FindAllAsync(filtro))
                 {
-                    int batteria = await LeggiController(d.Id, ePS5);
-                    if (batteria >= 0)
+                    ControllerTrovato controller = await LeggiController(d.Id, ePS5);
+                    if (controller != null)
                     {
-                        trovati.Add(new ControllerTrovato { EPS5 = ePS5, Batteria = batteria });
+                        trovati.Add(controller);
                     }
                 }
             }
@@ -122,15 +124,15 @@ namespace BatterieInBarra
             }
         }
 
-        // Apre il controller, legge qualche rapporto e trova la batteria (-1 se non riesce)
-        static async Task<int> LeggiController(string percorso, bool ePS5)
+        // Apre il controller, legge qualche rapporto e trova la batteria (null se non riesce)
+        static async Task<ControllerTrovato> LeggiController(string percorso, bool ePS5)
         {
             SafeFileHandle maniglia = CreateFile(percorso, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
                 IntPtr.Zero, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, IntPtr.Zero);
             if (maniglia.IsInvalid)
             {
                 Registro.Scrivi("PlayStation: non riesco ad aprire il controller (errore " + Marshal.GetLastWin32Error() + ")");
-                return -1;
+                return null;
             }
 
             try
@@ -140,7 +142,7 @@ namespace BatterieInBarra
                 HIDP_CAPS caratteristiche;
                 if (!HidD_GetPreparsedData(maniglia, out dati))
                 {
-                    return -1;
+                    return null;
                 }
                 HidP_GetCaps(dati, out caratteristiche);
                 HidD_FreePreparsedData(dati);
@@ -165,25 +167,29 @@ namespace BatterieInBarra
                         if (await Task.WhenAny(lettura, Task.Delay(1000)) != lettura)
                         {
                             Registro.Scrivi("PlayStation: il controller non manda dati (è acceso?)");
-                            return -1;
+                            return null;
                         }
 
                         ultimoTipo = rapporto[0];
                         int batteria = LeggiBatteria(rapporto, ePS5);
                         if (batteria >= 0)
                         {
-                            return batteria;
+                            ControllerTrovato trovato = new ControllerTrovato();
+                            trovato.EPS5 = ePS5;
+                            trovato.Batteria = batteria;
+                            trovato.InCarica = LeggiInCarica(rapporto, ePS5);
+                            return trovato;
                         }
                     }
                     Registro.Scrivi("PlayStation: nessun rapporto con la batteria (ultimo tipo 0x"
                         + ultimoTipo.ToString("X2") + ", lunghezza " + caratteristiche.InputReportByteLength + ")");
                 }
-                return -1;
+                return null;
             }
             catch (Exception errore)
             {
                 Registro.Scrivi("PlayStation: errore nella lettura: " + errore.Message);
-                return -1;
+                return null;
             }
             finally
             {
@@ -191,9 +197,8 @@ namespace BatterieInBarra
             }
         }
 
-        // Trova la batteria dentro un rapporto. Restituisce -1 se il rapporto non la contiene.
-        // (È "public" per poterla controllare con i test automatici)
-        public static int LeggiBatteria(byte[] rapporto, bool ePS5)
+        // In quale byte del rapporto c'è la batteria? (-1 se questo rapporto non ce l'ha)
+        static int PosizioneBatteria(byte[] rapporto, bool ePS5)
         {
             if (rapporto.Length < 2)
             {
@@ -205,52 +210,77 @@ namespace BatterieInBarra
             {
                 // PS4: 0x01 col cavo (rapporto di esattamente 64 byte), 0x11 via Bluetooth.
                 // Attenzione: via Bluetooth arriva anche un 0x01 "corto" senza batteria (in un buffer più lungo)
-                int posizione = -1;
                 if (tipo == 0x01 && rapporto.Length == 64)
                 {
-                    posizione = 30;
+                    return 30;
                 }
                 if (tipo == 0x11 && rapporto.Length >= 78)
                 {
-                    posizione = 32;
+                    return 32;
                 }
-                if (posizione < 0)
-                {
-                    return -1;
-                }
-
-                byte valore = rapporto[posizione];
-                bool cavo = (valore & 0x10) != 0;
-                int livello = valore & 0x0F;
-                int massimo = cavo ? 11 : 8;
-                return Math.Min(livello * 100 / massimo, 100);
             }
             else
             {
                 // PS5: 0x01 col cavo (esattamente 64 byte), 0x31 via Bluetooth
-                int posizione = -1;
                 if (tipo == 0x01 && rapporto.Length == 64)
                 {
-                    posizione = 53;
+                    return 53;
                 }
                 if (tipo == 0x31 && rapporto.Length >= 78)
                 {
-                    posizione = 54;
+                    return 54;
                 }
-                if (posizione < 0)
-                {
-                    return -1;
-                }
-
-                byte valore = rapporto[posizione];
-                int livello = valore & 0x0F;
-                int stato = valore >> 4;
-                if (stato == 2)
-                {
-                    return 100;   // carica completa
-                }
-                return Math.Min(livello * 10 + 5, 100);
             }
+            return -1;
+        }
+
+        // Trova la batteria dentro un rapporto. Restituisce -1 se il rapporto non la contiene.
+        // (È "public" per poterla controllare con i test automatici)
+        public static int LeggiBatteria(byte[] rapporto, bool ePS5)
+        {
+            int posizione = PosizioneBatteria(rapporto, ePS5);
+            if (posizione < 0)
+            {
+                return -1;
+            }
+            byte valore = rapporto[posizione];
+            int livello = valore & 0x0F;
+
+            if (!ePS5)
+            {
+                bool cavo = (valore & 0x10) != 0;
+                int massimo = cavo ? 11 : 8;
+                return Math.Min(livello * 100 / massimo, 100);
+            }
+
+            int stato = valore >> 4;
+            if (stato == 2)
+            {
+                return 100;   // carica completa
+            }
+            return Math.Min(livello * 10 + 5, 100);
+        }
+
+        // Il controller si sta caricando?
+        public static bool LeggiInCarica(byte[] rapporto, bool ePS5)
+        {
+            int posizione = PosizioneBatteria(rapporto, ePS5);
+            if (posizione < 0)
+            {
+                return false;
+            }
+            byte valore = rapporto[posizione];
+
+            if (!ePS5)
+            {
+                // PS4: col cavo e non ancora pieno (11 = carica completa)
+                bool cavo = (valore & 0x10) != 0;
+                int livello = valore & 0x0F;
+                return cavo && livello < 11;
+            }
+
+            // PS5: cifra alta 1 = in carica
+            return (valore >> 4) == 1;
         }
     }
 }

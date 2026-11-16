@@ -38,6 +38,26 @@ namespace BatterieInBarra.Test
         }
 
         [Fact]
+        public void PS4_capisce_se_e_in_carica()
+        {
+            // col cavo e livello 6 su 11: in carica
+            Assert.True(PlayStation.LeggiInCarica(Rapporto(0x01, 64, 30, 0x16), false));
+            // col cavo ma pieno (11): non sta più caricando
+            Assert.False(PlayStation.LeggiInCarica(Rapporto(0x01, 64, 30, 0x1B), false));
+            // senza cavo: no
+            Assert.False(PlayStation.LeggiInCarica(Rapporto(0x11, 547, 32, 0x04), false));
+        }
+
+        [Fact]
+        public void PS5_capisce_se_e_in_carica()
+        {
+            // cifra alta 1 = in carica, 2 = carica completa, 0 = a batteria
+            Assert.True(PlayStation.LeggiInCarica(Rapporto(0x31, 78, 54, 0x16), true));
+            Assert.False(PlayStation.LeggiInCarica(Rapporto(0x01, 64, 53, 0x2A), true));
+            Assert.False(PlayStation.LeggiInCarica(Rapporto(0x31, 78, 54, 0x06), true));
+        }
+
+        [Fact]
         public void PS5_via_Bluetooth_e_col_cavo()
         {
             // livello 6 -> 65%

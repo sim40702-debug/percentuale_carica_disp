@@ -21,7 +21,7 @@ namespace BatterieInBarra
         public string Nome;               // nome scelto da te
         public int Batteria;
         public bool SullaBarra;
-        public bool InCarica;             // solo per il PC
+        public bool InCarica;             // si sta caricando (mostriamo il fulmine)
         public string Tempo;              // "circa 6 ore rimaste"
         public List<Lettura> Storia24;    // ultime 24 ore
         public List<Lettura> Storia7;     // ultimi 7 giorni
@@ -67,6 +67,7 @@ namespace BatterieInBarra
         Dictionary<string, bool> giaAvvisati = new Dictionary<string, bool>();
         Dictionary<string, int> minimoDaUltimaCarica = new Dictionary<string, int>();
         Dictionary<string, bool> inCarica = new Dictionary<string, bool>();
+        Dictionary<string, DateTime> ultimaSalita = new Dictionary<string, DateTime>();   // quando la batteria è salita l'ultima volta
         double larghezzaBarra = LARGHEZZA_VUOTA;
         DateTime ultimaChiusuraWidget = DateTime.MinValue;
         bool staLeggendo = false;
@@ -316,6 +317,11 @@ namespace BatterieInBarra
                 }
                 else
                 {
+                    if (percentuale > prima.P)
+                    {
+                        ultimaSalita[nome] = DateTime.Now;
+                    }
+
                     // È salita di almeno 3 punti rispetto al minimo: è stato caricato
                     bool giaInCarica = inCarica.ContainsKey(nome) && inCarica[nome];
                     if (!giaInCarica && percentuale >= minimoDaUltimaCarica[nome] + 3)
@@ -376,7 +382,15 @@ namespace BatterieInBarra
                     }
                 }
                 v.SullaBarra = !Opzioni.Nascosti.Contains(originale);
-                v.Tempo = cronologia.TempoStimato(originale);
+                v.InCarica = StaCaricando(originale);
+                if (v.InCarica)
+                {
+                    v.Tempo = Testi.T("in_carica");
+                }
+                else
+                {
+                    v.Tempo = cronologia.TempoStimato(originale);
+                }
                 vista.Add(v);
             }
 
@@ -746,6 +760,25 @@ namespace BatterieInBarra
         }
 
         // La batteria attuale di un dispositivo (-1 se non è collegato)
+        // Il dispositivo si sta caricando?
+        // - controller PlayStation e AirPods ce lo dicono loro
+        // - gli altri no: lo capiamo se la batteria è salita (di almeno 3 punti) negli ultimi 20 minuti
+        bool StaCaricando(string originale)
+        {
+            foreach (Dispositivo d in ultimiDati)
+            {
+                if (d.Nome == originale && d.SaSeCarica)
+                {
+                    return d.InCarica;
+                }
+            }
+
+            bool salita = inCarica.ContainsKey(originale) && inCarica[originale];
+            bool salitaDaPoco = ultimaSalita.ContainsKey(originale)
+                && DateTime.Now - ultimaSalita[originale] < TimeSpan.FromMinutes(20);
+            return salita && salitaDaPoco && BatteriaDi(originale) < 100;
+        }
+
         public int BatteriaDi(string originale)
         {
             foreach (Dispositivo d in ultimiDati)
@@ -933,6 +966,7 @@ namespace BatterieInBarra
             statistiche.Cancella();
             minimoDaUltimaCarica.Clear();
             inCarica.Clear();
+            ultimaSalita.Clear();
             MostraTutto();
         }
 

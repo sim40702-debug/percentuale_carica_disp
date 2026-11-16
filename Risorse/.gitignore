@@ -1,0 +1,23 @@
+# File creati quando compili (si ricreano sempre)
+bin/
+obj/
+uscita/
+uscita-installer/
+*.exe
+
+# Visual Studio e Rider
+.vs/
+.idea/
+*.user
+
+# Impostazioni di VS Code
+.vscode/
+
+# File creati da Mac e Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Vecchia versione Electron
+dist/
+node_modules/

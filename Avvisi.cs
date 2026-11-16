@@ -2,6 +2,8 @@
 // Le notifiche di Windows ("Batteria scarica", "Carica completa").
 
 using System;
+using System.IO;
+using System.Windows;
 using Microsoft.Win32;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
@@ -20,6 +22,18 @@ namespace BatterieInBarra
                 using (RegistryKey chiave = Registry.CurrentUser.CreateSubKey(@"Software\Classes\AppUserModelId\" + ID_APP))
                 {
                     chiave.SetValue("DisplayName", "Batterie in Barra");
+
+                    // L'icona delle notifiche: Windows la vuole come file, quindi la copiamo nella cartella dei dati
+                    string fileIcona = Path.Combine(Impostazioni.Cartella(), "icona.png");
+                    if (!File.Exists(fileIcona))
+                    {
+                        using (Stream dentroApp = Application.GetResourceStream(new Uri("pack://application:,,,/Risorse/icona.png")).Stream)
+                        using (FileStream file = File.Create(fileIcona))
+                        {
+                            dentroApp.CopyTo(file);
+                        }
+                    }
+                    chiave.SetValue("IconUri", fileIcona);
                 }
             }
             catch (Exception)

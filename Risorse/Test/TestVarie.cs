@@ -1,0 +1,117 @@
+// TestVarie.cs
+// Controlla le funzioni piccole: versioni, file della release, indirizzi Bluetooth,
+// Non disturbare, colori e traduzioni.
+
+using System.Windows.Media;
+using Xunit;
+
+namespace BatterieInBarra.Test
+{
+    public class TestVarie
+    {
+        // ----- Versioni -----
+
+        [Fact]
+        public void Riconosce_le_versioni_piu_nuove()
+        {
+            Assert.True(Aggiornamenti.EPiuNuova("0.2.7", "0.2.6"));
+            Assert.True(Aggiornamenti.EPiuNuova("0.10.0", "0.9.9"));   // 10 è più di 9, anche se "1" < "9"
+            Assert.False(Aggiornamenti.EPiuNuova("0.2.6", "0.2.6"));
+            Assert.False(Aggiornamenti.EPiuNuova("0.2.5", "0.2.6"));
+            Assert.False(Aggiornamenti.EPiuNuova("ciao", "0.2.6"));     // versione sbagliata = non aggiorna
+        }
+
+        [Fact]
+        public void Sceglie_il_file_dell_app_e_non_l_installer()
+        {
+            Assert.True(Aggiornamenti.EFileApp("BatterieInBarra-0.2.7.exe"));
+            Assert.False(Aggiornamenti.EFileApp("BatterieInBarra-Setup-0.2.7.exe"));
+            Assert.False(Aggiornamenti.EFileApp("latest.yml"));
+        }
+
+        // ----- Indirizzi Bluetooth -----
+
+        [Fact]
+        public void Legge_l_indirizzo_Bluetooth_dall_Id()
+        {
+            Assert.Equal("A0B1C2D3E4F5", Batterie.IndirizzoAllaFine("Bluetooth#Bluetooth00:1a:7d:da:71:13-a0:b1:c2:d3:e4:f5"));
+            Assert.Equal("D43E22AABBCC", Batterie.IndirizzoAllaFine("BluetoothLE#BluetoothLEe4:a4:71:00:11:22-d4:3e:22:aa:bb:cc"));
+            Assert.Null(Batterie.IndirizzoAllaFine("BTHENUM\\DEV_A0B1C2D3E4F5\\7&1234"));
+        }
+
+        // ----- Non disturbare -----
+
+        [Fact]
+        public void Silenzio_che_passa_la_mezzanotte()
+        {
+            // dalle 23 alle 7
+            Assert.True(Impostazioni.OraSilenziosa(23, 23, 7));
+            Assert.True(Impostazioni.OraSilenziosa(3, 23, 7));
+            Assert.False(Impostazioni.OraSilenziosa(7, 23, 7));
+            Assert.False(Impostazioni.OraSilenziosa(12, 23, 7));
+            Assert.False(Impostazioni.OraSilenziosa(22, 23, 7));
+        }
+
+        [Fact]
+        public void Silenzio_che_inizia_a_mezzanotte()
+        {
+            // dalle 0 alle 6
+            Assert.True(Impostazioni.OraSilenziosa(0, 0, 6));
+            Assert.True(Impostazioni.OraSilenziosa(5, 0, 6));
+            Assert.False(Impostazioni.OraSilenziosa(6, 0, 6));
+            Assert.False(Impostazioni.OraSilenziosa(23, 0, 6));
+        }
+
+        // ----- Colori -----
+
+        [Fact]
+        public void Colori_delle_batterie()
+        {
+            Grafica.SogliaGiallo = 40;
+            Grafica.SogliaRosso = 20;
+            Grafica.TuttoBianco = false;
+
+            Assert.Equal(Grafica.Rosso, Grafica.ColoreBatteria(10));
+            Assert.Equal(Grafica.Rosso, Grafica.ColoreBatteria(20));
+            Assert.Equal(Grafica.Giallo, Grafica.ColoreBatteria(30));
+            Assert.Equal(Grafica.Verde, Grafica.ColoreBatteria(90));
+        }
+
+        [Fact]
+        public void Batterie_bianche_diventano_rosse_solo_se_scariche()
+        {
+            Grafica.SogliaGiallo = 40;
+            Grafica.SogliaRosso = 20;
+            Grafica.TuttoBianco = true;
+            Grafica.ColoreNeutro = Colors.White;
+
+            Assert.Equal(Colors.White, Grafica.ColoreBatteria(30));
+            Assert.Equal(Colors.White, Grafica.ColoreBatteria(90));
+            Assert.Equal(Grafica.Rosso, Grafica.ColoreBatteria(15));
+
+            Grafica.TuttoBianco = false;   // rimettiamo come prima
+        }
+
+        // ----- Grandezze (barra di avanzamento e spazio occupato) -----
+
+        [Fact]
+        public void Grandezze_dei_file()
+        {
+            Assert.Equal("512 byte", Testi.Grandezza(512));
+            Assert.Equal("2 KB", Testi.Grandezza(2 * 1024));
+            Assert.Equal("5 MB", Testi.Grandezza(5 * 1024 * 1024));
+        }
+
+        // ----- Traduzioni -----
+
+        [Fact]
+        public void Le_scritte_esistono_e_mettono_i_valori()
+        {
+            // Se una chiave non esiste, Testi.T restituisce la chiave stessa
+            Assert.NotEqual("batterie", Testi.T("batterie"));
+            Assert.NotEqual("sezione_dispositivi", Testi.T("sezione_dispositivi"));
+            Assert.Contains("0.2.7", Testi.T("versione", "0.2.7"));
+            Assert.Contains("85", Testi.T("avviso_scarica_testo", "Cuffie", 85));
+        }
+    }
+}

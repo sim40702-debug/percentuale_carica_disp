@@ -1,7 +1,21 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.2.9).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.1).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.3.1 — 16/11/2026 (fulmine quando carica)
+- **Fulmine nella batteria quando un dispositivo è in carica**: la batteria diventa verde
+  con un fulmine giallo in mezzo, sulla barra e nel widget. Nel widget c'è scritto "In carica".
+- Controller PS4/PS5, AirPods e batteria del PC dicono loro se sono in carica, quindi il fulmine compare subito.
+  Per gli altri (cuffie, mouse, tastiere) Windows non lo sa: il fulmine compare quando la batteria sale di
+  qualche punto e sparisce se smette di salire per 20 minuti.
+- **L'icona dell'app adesso c'è davvero** (nella 0.3.0 erano arrivati solo i file dell'icona, non il codice che la usa):
+  file dell'app, menu Start, installer, finestre e notifiche.
+
+## 0.3.0 — 16/11/2026 (icona nuova)
+- **L'app ha la sua icona**: tre mini batterie (verde, gialla, rossa) su sfondo blu.
+  La vedi sul file dell'app, nel menu Start, nell'installer, nelle finestre e nelle notifiche.
+- A 16 pixel (dove c'è poco spazio) l'icona è semplificata, così si capisce lo stesso.
 
 ## 0.2.9 — 16/11/2026 (controller PlayStation)
 - **Controller PS4 (DualShock 4) e PS5 (DualSense)**: adesso compaiono anche loro, via Bluetooth e col cavo.

@@ -22,6 +22,7 @@ OutputBaseFilename=BatterieInBarra-Setup-{#Versione}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=Risorse\icona.ico
 UninstallDisplayIcon={app}\BatterieInBarra.exe
 UninstallDisplayName=Batterie in Barra
 ; Se l'app è aperta, l'installer chiede di chiuderla

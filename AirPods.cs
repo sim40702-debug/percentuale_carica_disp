@@ -18,6 +18,7 @@ namespace BatterieInBarra
     {
         public int Auricolari;    // percentuale (quella più bassa tra sinistro e destro)
         public int Custodia;      // percentuale, -1 se non si sa (custodia chiusa o lontana)
+        public bool InCarica;     // un auricolare si sta caricando (è nella custodia)
         public long Quando;       // millisecondi
         public short Segnale;     // forza del segnale: più è vicino a 0, più le AirPods sono vicine
     }
@@ -112,6 +113,8 @@ namespace BatterieInBarra
             LetturaAirPods lettura = new LetturaAirPods();
             lettura.Auricolari = auricolari * 10;
             lettura.Custodia = custodia <= 10 ? custodia * 10 : -1;
+            // Cifra alta del byte 7: bit 1 e 2 = gli auricolari si stanno caricando (bit 4 = la custodia)
+            lettura.InCarica = (b[7] & 0x30) != 0;
             lettura.Quando = Cronologia.Adesso();
             lettura.Segnale = segnale;
             return lettura;

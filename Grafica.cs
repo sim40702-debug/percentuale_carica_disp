@@ -176,8 +176,9 @@ namespace BatterieInBarra
 
         // ----- Mini batteria -----
 
-        // Crea una mini batteria che si riempie con la percentuale
-        public static FrameworkElement CreaMiniBatteria(int percentuale, double larghezza, double altezza, Brush bordo)
+        // Crea una mini batteria che si riempie con la percentuale.
+        // "inCarica": riempimento verde e un fulmine giallo in mezzo
+        public static FrameworkElement CreaMiniBatteria(int percentuale, double larghezza, double altezza, Brush bordo, bool inCarica = false)
         {
             double spessore = Math.Max(1.2, altezza * 0.11);
             double margine = spessore;
@@ -197,6 +198,10 @@ namespace BatterieInBarra
             carica.HorizontalAlignment = HorizontalAlignment.Left;
             carica.Width = Math.Max(0, spazioDentro * percentuale / 100.0);
             carica.Background = Pennello(ColoreBatteria(percentuale));
+            if (inCarica)
+            {
+                carica.Background = Pennello(ColoreBatteria(100));   // in carica è sempre verde
+            }
             carica.CornerRadius = new CornerRadius(altezza * 0.12);
             corpo.Child = carica;
 
@@ -209,12 +214,36 @@ namespace BatterieInBarra
             punta.Margin = new Thickness(1, 0, 0, 0);
             punta.VerticalAlignment = VerticalAlignment.Center;
 
+            // Corpo e fulmine uno sopra l'altro (il fulmine sta al centro del corpo)
+            Grid corpoConFulmine = new Grid();
+            corpoConFulmine.Children.Add(corpo);
+            if (inCarica)
+            {
+                corpoConFulmine.Children.Add(CreaFulmine(altezza));
+            }
+
             StackPanel batteria = new StackPanel();
             batteria.Orientation = Orientation.Horizontal;
             batteria.VerticalAlignment = VerticalAlignment.Center;
-            batteria.Children.Add(corpo);
+            batteria.Children.Add(corpoConFulmine);
             batteria.Children.Add(punta);
             return batteria;
+        }
+
+        // Il fulmine giallo con un bordino scuro, così si vede sia sul verde sia sul vuoto
+        static FrameworkElement CreaFulmine(double altezza)
+        {
+            System.Windows.Shapes.Path fulmine = new System.Windows.Shapes.Path();
+            fulmine.Data = Geometry.Parse("M 6,0 L 0,8 L 4.5,8 L 3,14 L 10,5 L 5.5,5 L 7,0 Z");
+            fulmine.Fill = Pennello("#FFD60A");
+            fulmine.Stroke = Pennello("#B0000000");
+            fulmine.StrokeThickness = 1;
+            fulmine.Stretch = Stretch.Uniform;
+            fulmine.Height = altezza * 0.95;
+            fulmine.HorizontalAlignment = HorizontalAlignment.Center;
+            fulmine.VerticalAlignment = VerticalAlignment.Center;
+            fulmine.IsHitTestVisible = false;
+            return fulmine;
         }
     }
 }

@@ -16,8 +16,11 @@
     <RootNamespace>BatterieInBarra</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
+    <!-- L'icona del file .exe (Esplora file, desktop, menu Start) -->
+    <ApplicationIcon>Risorse\icona.ico</ApplicationIcon>
+
     <!-- Informazioni dell'app (la versione vera la mette GitHub dal tag) -->
-    <Version>0.2.9</Version>
+    <Version>0.3.1</Version>
     <Product>Batterie in Barra</Product>
     <Authors>Simone</Authors>
     <Description>Mini batterie per i dispositivi Bluetooth sulla barra di Windows</Description>
@@ -29,6 +32,12 @@
     <Page Remove="Test\**" />
     <None Remove="Test\**" />
     <EmbeddedResource Remove="Test\**" />
+  </ItemGroup>
+
+  <!-- L'icona dentro l'app: per le finestre e per le notifiche -->
+  <ItemGroup>
+    <Resource Include="Risorse\icona.ico" />
+    <Resource Include="Risorse\icona.png" />
   </ItemGroup>
 
 </Project>

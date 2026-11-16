@@ -1,0 +1,494 @@
+<Window x:Class="BatterieInBarra.ImpostazioniWindow"
+        Icon="/Risorse/icona.ico"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:BatterieInBarra"
+        Title="{local:Testo titolo_impostazioni}"
+        Width="580" Height="760"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource Sfondo}"
+        FontFamily="Segoe UI Variable Text, Segoe UI">
+
+    <Window.Resources>
+        <!-- Titolo di una sezione (DISPOSITIVI, BARRA...) -->
+        <Style x:Key="TitoloSezione" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TestoGrigio}" />
+            <Setter Property="Margin" Value="4,16,4,8" />
+        </Style>
+
+        <!-- Il riquadro arrotondato che contiene le righe -->
+        <Style x:Key="Riquadro" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SfondoRiquadro}" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="14,2,14,2" />
+        </Style>
+
+        <Style x:Key="TitoloRiga" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{DynamicResource Testo}" />
+        </Style>
+
+        <Style x:Key="SottoRiga" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="Foreground" Value="{DynamicResource TestoGrigio}" />
+            <Setter Property="Margin" Value="0,3,0,0" />
+        </Style>
+
+        <Style x:Key="Separatore" TargetType="Border">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource Linea}" />
+        </Style>
+
+        <!-- Interruttore: una casella di spunta con l'aspetto da interruttore -->
+        <Style x:Key="Interruttore" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="Binario" Width="38" Height="22" CornerRadius="11" Background="#8E8E93">
+                            <Ellipse x:Name="Pallino" Width="18" Height="18" Fill="White"
+                                     HorizontalAlignment="Left" Margin="2,0,0,0" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Binario" Property="Background" Value="#34C759" />
+                                <Setter TargetName="Pallino" Property="Margin" Value="18,0,0,0" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Scelta 10% / 20% / 30% -->
+        <Style x:Key="Scelta" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource TestoGrigio}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Sfondo" CornerRadius="6" Padding="14,4,14,5" Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Sfondo" Property="Background" Value="{DynamicResource Scelto}" />
+                                <Setter Property="Foreground" Value="{DynamicResource Testo}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pulsante normale -->
+        <Style x:Key="Pulsante" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource Testo}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Sfondo" CornerRadius="6" Padding="12,5,12,6" Background="{DynamicResource SfondoCampo}"
+                                BorderBrush="{DynamicResource Bordo}" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Sfondo" Property="Background" Value="{DynamicResource Scelto}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pulsante rosso (per eliminare) -->
+        <Style x:Key="PulsanteRosso" TargetType="Button" BasedOn="{StaticResource Pulsante}">
+            <Setter Property="Foreground" Value="#FF3B30" />
+        </Style>
+
+        <!-- Piccolo bottone con la freccia (per l'ordine dei dispositivi) -->
+        <Style x:Key="Freccia" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource TestoGrigio}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Sfondo" Width="22" Height="18" CornerRadius="4" Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Sfondo" Property="Background" Value="{DynamicResource Scelto}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="22,6,22,22">
+
+            <!-- Dispositivi: nome, ordine e "sulla barra" (le righe le crea il codice) -->
+            <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_dispositivi}" />
+            <Border Style="{StaticResource Riquadro}">
+                <StackPanel x:Name="ListaDispositivi" />
+            </Border>
+
+            <!-- Barra -->
+            <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_barra}" />
+            <Border Style="{StaticResource Riquadro}">
+                <StackPanel>
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo mostra_percentuale}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo mostra_percentuale_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="MostraPercentuale" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo animazioni}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo animazioni_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="Animazioni" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Colori -->
+            <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_colori}" />
+            <Border Style="{StaticResource Riquadro}">
+                <StackPanel>
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo stile_colori}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo stile_colori_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="StileColori" GroupName="Stile" Style="{StaticResource Scelta}" Content="{local:Testo a_colori}" Click="QuandoCambiaColori" />
+                                <RadioButton x:Name="StileBianco" GroupName="Stile" Style="{StaticResource Scelta}" Content="{local:Testo bianche}" Click="QuandoCambiaColori" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="TitoloGiallo" Style="{StaticResource TitoloRiga}" Text="{local:Testo giallo_sotto}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="Giallo30" GroupName="Giallo" Style="{StaticResource Scelta}" Content="30%" Click="QuandoCambiaColori" />
+                                <RadioButton x:Name="Giallo40" GroupName="Giallo" Style="{StaticResource Scelta}" Content="40%" Click="QuandoCambiaColori" />
+                                <RadioButton x:Name="Giallo50" GroupName="Giallo" Style="{StaticResource Scelta}" Content="50%" Click="QuandoCambiaColori" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo rosso_sotto}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="Rosso10" GroupName="Rosso" Style="{StaticResource Scelta}" Content="10%" Click="QuandoCambiaColori" />
+                                <RadioButton x:Name="Rosso15" GroupName="Rosso" Style="{StaticResource Scelta}" Content="15%" Click="QuandoCambiaColori" />
+                                <RadioButton x:Name="Rosso20" GroupName="Rosso" Style="{StaticResource Scelta}" Content="20%" Click="QuandoCambiaColori" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Avvisi -->
+            <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_avvisi}" />
+            <Border Style="{StaticResource Riquadro}">
+                <StackPanel>
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo soglia}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="Soglia10" GroupName="Soglia" Style="{StaticResource Scelta}" Content="10%" Click="QuandoCambiaSoglia" />
+                                <RadioButton x:Name="Soglia20" GroupName="Soglia" Style="{StaticResource Scelta}" Content="20%" Click="QuandoCambiaSoglia" />
+                                <RadioButton x:Name="Soglia30" GroupName="Soglia" Style="{StaticResource Scelta}" Content="30%" Click="QuandoCambiaSoglia" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo carica_completa}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo carica_completa_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="AvvisoCompleta" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo promemoria}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo promemoria_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="PromemoriaSerale" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo ora_promemoria}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="Ora21" GroupName="Ora" Style="{StaticResource Scelta}" Content="21:00" Click="QuandoCambiaOra" />
+                                <RadioButton x:Name="Ora22" GroupName="Ora" Style="{StaticResource Scelta}" Content="22:00" Click="QuandoCambiaOra" />
+                                <RadioButton x:Name="Ora23" GroupName="Ora" Style="{StaticResource Scelta}" Content="23:00" Click="QuandoCambiaOra" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo non_disturbare}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo non_disturbare_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="NonDisturbare" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo silenzio_dalle}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="Dalle22" GroupName="Dalle" Style="{StaticResource Scelta}" Content="22:00" Click="QuandoCambiaSilenzio" />
+                                <RadioButton x:Name="Dalle23" GroupName="Dalle" Style="{StaticResource Scelta}" Content="23:00" Click="QuandoCambiaSilenzio" />
+                                <RadioButton x:Name="Dalle0" GroupName="Dalle" Style="{StaticResource Scelta}" Content="00:00" Click="QuandoCambiaSilenzio" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo silenzio_alle}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="Alle6" GroupName="Alle" Style="{StaticResource Scelta}" Content="06:00" Click="QuandoCambiaSilenzio" />
+                                <RadioButton x:Name="Alle7" GroupName="Alle" Style="{StaticResource Scelta}" Content="07:00" Click="QuandoCambiaSilenzio" />
+                                <RadioButton x:Name="Alle8" GroupName="Alle" Style="{StaticResource Scelta}" Content="08:00" Click="QuandoCambiaSilenzio" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Generale -->
+            <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_generale}" />
+            <Border Style="{StaticResource Riquadro}">
+                <StackPanel>
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo avvio_windows}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo avvio_windows_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="AvvioWindows" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo batteria_pc}" />
+                            <TextBlock x:Name="SottoBatteriaPC" Style="{StaticResource SottoRiga}" Text="{local:Testo batteria_pc_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="MostraBatteriaPC" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo scorciatoia}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo scorciatoia_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="Scorciatoia" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Aggiornamenti -->
+            <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_aggiornamenti}" />
+            <Border Style="{StaticResource Riquadro}">
+                <StackPanel>
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="TestoVersione" Style="{StaticResource TitoloRiga}" Text="" />
+                            <TextBlock x:Name="TestoStatoAggiornamenti" Style="{StaticResource SottoRiga}" Text="" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button x:Name="PulsanteAggiornamenti" Grid.Column="1" Style="{StaticResource Pulsante}" Content="{local:Testo controlla_ora}" Margin="12,0,0,0" Click="QuandoPulsanteAggiornamenti" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo cerca_da_sola}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo cerca_da_sola_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="ControllaAggiornamenti" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Dati raccolti -->
+            <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_dati}" />
+            <Border Style="{StaticResource Riquadro}">
+                <StackPanel>
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo spazio_occupato}" />
+                            <TextBlock x:Name="TestoSpazio" Style="{StaticResource SottoRiga}" Text="" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Style="{StaticResource Pulsante}" Content="{local:Testo apri_cartella}" Margin="12,0,0,0" Click="QuandoApriCartella" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo supporto}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo supporto_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button x:Name="PulsanteSupporto" Grid.Column="1" Style="{StaticResource Pulsante}" Content="{local:Testo copia}" Margin="12,0,0,0" Click="QuandoCopiaSupporto" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo cancella_cronologia}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo cancella_cronologia_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Style="{StaticResource Pulsante}" Content="{local:Testo cancella}" Margin="12,0,0,0" Click="QuandoCancellaCronologia" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo ripristina_impostazioni}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo ripristina_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Style="{StaticResource Pulsante}" Content="{local:Testo ripristina}" Margin="12,0,0,0" Click="QuandoRipristina" />
+                    </Grid>
+                    <Border Style="{StaticResource Separatore}" />
+                    <Grid Margin="0,11,0,11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo elimina_app}" />
+                            <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo elimina_app_sotto}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Style="{StaticResource PulsanteRosso}" Content="{local:Testo elimina}" Margin="12,0,0,0" Click="QuandoEliminaApp" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>

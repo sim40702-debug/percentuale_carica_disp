@@ -29,6 +29,17 @@ namespace BatterieInBarra.Test
         }
 
         [Fact]
+        public void Capisce_se_gli_auricolari_sono_in_carica()
+        {
+            // cifra alta del byte 7: 3 = tutti e due in carica, 8 = nessuno in carica
+            LetturaAirPods inCarica = AirPods.LeggiMessaggio(Aiuto.Byte("07190102202ba7350100050000000000000000000000000000000000"), -50);
+            LetturaAirPods nonInCarica = AirPods.LeggiMessaggio(Aiuto.Byte("0719010e202b998f01000500000000000000000000000000000000"), -50);
+
+            Assert.True(inCarica.InCarica);
+            Assert.False(nonInCarica.InCarica);
+        }
+
+        [Fact]
         public void Auricolari_nella_custodia_vengono_ignorati()
         {
             LetturaAirPods lettura = AirPods.LeggiMessaggio(Aiuto.Byte("071901022055ff0501000500000000000000000000000000000000"), -50);

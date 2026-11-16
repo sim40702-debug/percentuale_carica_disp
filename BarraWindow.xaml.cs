@@ -235,6 +235,10 @@ namespace BatterieInBarra
             }
 
             elemento.ToolTip = v.Nome + ": " + v.Batteria + "%";
+            if (v.InCarica)
+            {
+                elemento.ToolTip = v.Nome + ": " + v.Batteria + "% · " + Testi.T("in_carica");
+            }
             elemento.Width = mostraPercentuale ? 88 : 62;
 
             // [0] Icona (dal nome originale, così funziona anche se lo rinomini)
@@ -258,7 +262,7 @@ namespace BatterieInBarra
             riga.Children.Add(numero);
 
             // [2] Mini batteria
-            riga.Children.Add(Grafica.CreaMiniBatteria(v.Batteria, 23, 12, ColoreBordo()));
+            riga.Children.Add(Grafica.CreaMiniBatteria(v.Batteria, 23, 12, ColoreBordo(), v.InCarica));
 
             elemento.Child = riga;
         }
