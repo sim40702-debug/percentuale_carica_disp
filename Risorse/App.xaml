@@ -1,8 +1,0 @@
-<Application x:Class="BatterieInBarra.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             ShutdownMode="OnExplicitShutdown">
-    <!-- L'app non ha una finestra principale: parte da App.xaml.cs (OnStartup) -->
-    <Application.Resources>
-    </Application.Resources>
-</Application>
