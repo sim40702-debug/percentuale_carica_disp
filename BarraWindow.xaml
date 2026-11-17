@@ -13,6 +13,62 @@
         Topmost="True"
         FontFamily="Segoe UI Variable Text, Segoe UI">
 
+    <Window.Resources>
+        <!-- Il menu del tasto destro: arrotondato come in Windows 11.
+             I colori (MenuSfondo, MenuTesto...) li mette il codice, chiari o scuri come Windows -->
+        <Style x:Key="StileMenu" TargetType="ContextMenu">
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{DynamicResource MenuSfondo}" BorderBrush="{DynamicResource MenuBordo}"
+                                BorderThickness="1" CornerRadius="10" Padding="5" MinWidth="210">
+                            <ItemsPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Una voce del menu: icona (nel Tag) e testo -->
+        <Style x:Key="StileVoce" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource MenuTesto}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="Sfondo" Background="{TemplateBinding Background}" CornerRadius="6" Padding="10,7,14,7">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{TemplateBinding Tag}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                           FontSize="14" Width="16" VerticalAlignment="Center" Margin="0,0,11,0" />
+                                <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Sfondo" Property="Background" Value="{DynamicResource MenuSopra}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- La lineetta che divide i gruppi di voci -->
+        <Style x:Key="StileSeparatore" TargetType="Separator">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Separator">
+                        <Border Height="1" Margin="6,4,6,4" Background="{DynamicResource MenuBordo}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <!-- Qui compaiono le mini batterie, una per dispositivo (le crea BarraWindow.xaml.cs) -->
     <StackPanel x:Name="Contenitore"
                 Orientation="Horizontal"

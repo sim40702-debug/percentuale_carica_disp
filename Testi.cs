@@ -128,6 +128,11 @@ namespace BatterieInBarra
             { "errore_aggiornamento", new[] { "Non sono riuscito ad aggiornare l'app.", "The app could not be updated.", "Die App konnte nicht aktualisiert werden." } },
 
             // ----- Impostazioni -----
+            { "impostazioni_breve", new[] { "Impostazioni", "Settings", "Einstellungen" } },
+            { "categoria_dispositivi", new[] { "Dispositivi", "Devices", "Geräte" } },
+            { "categoria_aspetto", new[] { "Aspetto", "Appearance", "Darstellung" } },
+            { "categoria_avvisi", new[] { "Avvisi", "Notifications", "Benachrichtigungen" } },
+            { "categoria_generale", new[] { "Generale", "General", "Allgemein" } },
             { "titolo_impostazioni", new[] { "Batterie in Barra - Impostazioni", "Batterie in Barra - Settings", "Batterie in Barra - Einstellungen" } },
             { "sezione_dispositivi", new[] { "DISPOSITIVI", "DEVICES", "GERÄTE" } },
             { "sulla_barra", new[] { "Sulla barra", "On taskbar", "In Taskleiste" } },

@@ -1,7 +1,13 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.1).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.2).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.3.2 — 17/11/2026 (impostazioni a categorie e menu nuovo)
+- **Impostazioni divise in 4 categorie**: Dispositivi, Aspetto, Avvisi e Generale. A sinistra scegli la categoria
+  e a destra vedi solo quella, senza dover scorrere tutto. La finestra è più larga e meno alta.
+- **Menu del tasto destro nuovo**: arrotondato come in Windows 11, con un'icona per ogni voce, chiaro o scuro
+  come Windows. "Esci" è rosso e, quando c'è una versione nuova, la voce per aggiornare è verde in cima.
 
 ## 0.3.1 — 16/11/2026 (fulmine quando carica)
 - **Fulmine nella batteria quando un dispositivo è in carica**: la batteria diventa verde

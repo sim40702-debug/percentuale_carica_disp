@@ -99,6 +99,9 @@ namespace BatterieInBarra
                 Resources["Linea"] = Grafica.Pennello("#14000000");
                 Resources["IconaSfondo"] = Grafica.Pennello("#E5E5EA");
                 Resources["Scelto"] = Grafica.Pennello("#FFFFFF");
+                Resources["SfondoLaterale"] = Grafica.Pennello("#E8E8ED");
+                Resources["SopraVoce"] = Grafica.Pennello("#DCDCE1");
+                Resources["Selezionato"] = Grafica.Pennello("#FFFFFF");
             }
             else
             {
@@ -111,7 +114,24 @@ namespace BatterieInBarra
                 Resources["Linea"] = Grafica.Pennello("#14FFFFFF");
                 Resources["IconaSfondo"] = Grafica.Pennello("#3A3A3C");
                 Resources["Scelto"] = Grafica.Pennello("#636366");
+                Resources["SfondoLaterale"] = Grafica.Pennello("#18181A");
+                Resources["SopraVoce"] = Grafica.Pennello("#262628");
+                Resources["Selezionato"] = Grafica.Pennello("#2C2C2E");
             }
+        }
+
+        // ----- Categorie (colonna di sinistra) -----
+
+        // Hai cliccato una categoria: mostriamo solo la sua pagina
+        void QuandoCambiaCategoria(object sender, RoutedEventArgs e)
+        {
+            PaginaDispositivi.Visibility = CategoriaDispositivi.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PaginaAspetto.Visibility = CategoriaAspetto.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PaginaAvvisi.Visibility = CategoriaAvvisi.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PaginaGenerale.Visibility = CategoriaGenerale.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+
+            // La pagina nuova parte dall'inizio
+            Scorrimento.ScrollToTop();
         }
 
         Brush Colore(string nome)

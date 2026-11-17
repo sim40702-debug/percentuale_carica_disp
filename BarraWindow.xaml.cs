@@ -306,6 +306,7 @@ namespace BatterieInBarra
         // Clic destro: menu
         void QuandoClicDestro(object sender, MouseButtonEventArgs e)
         {
+            ColoriMenu();
             menu.PlacementTarget = this;
             menu.Placement = PlacementMode.MousePoint;
             menu.IsOpen = true;
@@ -318,30 +319,67 @@ namespace BatterieInBarra
         void CreaMenu()
         {
             menu = new ContextMenu();
+            menu.Style = (Style)Resources["StileMenu"];
 
-            voceAggiorna = CreaVoce(Testi.T("menu_aggiorna_versione", ""), QuandoInstallaAggiornamento);
+            // Le icone sono lettere del font di Windows "Segoe Fluent Icons"
+            voceAggiorna = CreaVoce(Testi.T("menu_aggiorna_versione", ""), "\uE896", QuandoInstallaAggiornamento);
             voceAggiorna.FontWeight = FontWeights.SemiBold;
-            separatoreAggiorna = new Separator();
+            separatoreAggiorna = CreaSeparatore();
             voceAggiorna.Visibility = Visibility.Collapsed;
             separatoreAggiorna.Visibility = Visibility.Collapsed;
             menu.Items.Add(voceAggiorna);
             menu.Items.Add(separatoreAggiorna);
 
-            menu.Items.Add(CreaVoce(Testi.T("menu_aggiorna_batterie"), QuandoAggiorna));
-            menu.Items.Add(CreaVoce(Testi.T("menu_impostazioni"), QuandoImpostazioni));
-            menu.Items.Add(new Separator());
-            menu.Items.Add(CreaVoce(Testi.T("menu_sinistra"), QuandoSinistra));
-            menu.Items.Add(CreaVoce(Testi.T("menu_destra"), QuandoDestra));
-            menu.Items.Add(new Separator());
-            menu.Items.Add(CreaVoce(Testi.T("menu_esci"), QuandoEsci));
+            menu.Items.Add(CreaVoce(Testi.T("menu_aggiorna_batterie"), "\uE72C", QuandoAggiorna));
+            menu.Items.Add(CreaVoce(Testi.T("menu_impostazioni"), "\uE713", QuandoImpostazioni));
+            menu.Items.Add(CreaSeparatore());
+            menu.Items.Add(CreaVoce(Testi.T("menu_sinistra"), "\uE72B", QuandoSinistra));
+            menu.Items.Add(CreaVoce(Testi.T("menu_destra"), "\uE72A", QuandoDestra));
+            menu.Items.Add(CreaSeparatore());
+
+            MenuItem voceEsci = CreaVoce(Testi.T("menu_esci"), "\uE7E8", QuandoEsci);
+            voceEsci.Foreground = Grafica.Pennello("#FF453A");   // rossa
+            menu.Items.Add(voceEsci);
         }
 
-        MenuItem CreaVoce(string testo, RoutedEventHandler quandoClic)
+        MenuItem CreaVoce(string testo, string icona, RoutedEventHandler quandoClic)
         {
             MenuItem voce = new MenuItem();
+            voce.Style = (Style)Resources["StileVoce"];
             voce.Header = testo;
+            voce.Tag = icona;
             voce.Click += quandoClic;
             return voce;
+        }
+
+        Separator CreaSeparatore()
+        {
+            Separator separatore = new Separator();
+            separatore.Style = (Style)Resources["StileSeparatore"];
+            return separatore;
+        }
+
+        // I colori del menu: chiari o scuri come le app di Windows (li rileggiamo ogni volta che si apre)
+        void ColoriMenu()
+        {
+            if (Grafica.AppChiare())
+            {
+                menu.Resources["MenuSfondo"] = Grafica.Pennello("#F9F9F9");
+                menu.Resources["MenuBordo"] = Grafica.Pennello("#1F000000");
+                menu.Resources["MenuTesto"] = Grafica.Pennello("#1C1C1E");
+                menu.Resources["MenuSopra"] = Grafica.Pennello("#0F000000");
+                voceAggiorna.Background = Grafica.Pennello("#D9F2DF");
+                voceAggiorna.Foreground = Grafica.Pennello("#1E7B34");
+            }
+            else
+            {
+                menu.Resources["MenuSfondo"] = Grafica.Pennello("#2B2B2B");
+                menu.Resources["MenuBordo"] = Grafica.Pennello("#3A3A3A");
+                menu.Resources["MenuTesto"] = Grafica.Pennello("#F2F2F2");
+                menu.Resources["MenuSopra"] = Grafica.Pennello("#3A3A3A");
+                voceAggiorna.Background = Grafica.Pennello("#1E5A2E");
+                voceAggiorna.Foreground = Grafica.Pennello("#9FE8B0");
+            }
         }
 
         // La chiama App: mostra (o nasconde) la voce per installare la versione nuova
