@@ -1,7 +1,11 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.3).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.4).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.3.4 — 18/11/2026 (foto nella descrizione)
+- **Foto nella pagina del progetto e nelle release**: la barra con le batterie, il widget, il menu e le impostazioni,
+  così si vede subito com'è l'app.
 
 ## 0.3.3 — 18/11/2026 (menu spostato e fulmine più affidabile)
 - **Il menu del tasto destro si apre più a sinistra**, fuori dalla zona delle notifiche di Windows:
