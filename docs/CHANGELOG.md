@@ -1,7 +1,14 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.2).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.3).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.3.3 — 18/11/2026 (menu spostato e fulmine più affidabile)
+- **Il menu del tasto destro si apre più a sinistra**, fuori dalla zona delle notifiche di Windows:
+  prima, se c'era una notifica, copriva il menu e non potevi cliccare "Impostazioni".
+- **Fulmine più affidabile per cuffie, mouse e tastiere**: molte cuffie mandano la batteria a scatti di 10%,
+  quindi il fulmine adesso resta acceso per un'ora dall'ultima salita (prima 20 minuti) e non si spegne tra uno scatto e l'altro.
+- Quando l'app nota che un dispositivo sta caricando lo scrive nel registro (Informazioni per il supporto).
 
 ## 0.3.2 — 17/11/2026 (impostazioni a categorie e menu nuovo)
 - **Impostazioni divise in 4 categorie**: Dispositivi, Aspetto, Avvisi e Generale. A sinistra scegli la categoria

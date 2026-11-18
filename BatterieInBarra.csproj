@@ -20,7 +20,7 @@
     <ApplicationIcon>Risorse\icona.ico</ApplicationIcon>
 
     <!-- Informazioni dell'app (la versione vera la mette GitHub dal tag) -->
-    <Version>0.3.2</Version>
+    <Version>0.3.3</Version>
     <Product>Batterie in Barra</Product>
     <Authors>Simone</Authors>
     <Description>Mini batterie per i dispositivi Bluetooth sulla barra di Windows</Description>

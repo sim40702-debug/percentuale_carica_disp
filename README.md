@@ -17,12 +17,12 @@ Scritta in **C# (WPF, .NET 10)**: leggera, senza PowerShell né browser dentro.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.3 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.4 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.3.3" && git push && git tag v0.3.3 && git push origin v0.3.3
+   git pull && git add . && git commit -m "Versione 0.3.4" && git push && git tag v0.3.4 && git push origin v0.3.4
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.3" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.4" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.

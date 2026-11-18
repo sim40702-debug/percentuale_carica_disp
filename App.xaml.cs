@@ -327,6 +327,7 @@ namespace BatterieInBarra
                     if (!giaInCarica && percentuale >= minimoDaUltimaCarica[nome] + 3)
                     {
                         inCarica[nome] = true;
+                        Registro.Scrivi("In carica (la batteria sale): " + nome + " " + percentuale + "%");
                         statistiche.RegistraCarica(nome, cronologia.OrePerCaricaCompleta(nome));
                         ControllaSalute(nome);
                     }
@@ -762,7 +763,8 @@ namespace BatterieInBarra
         // La batteria attuale di un dispositivo (-1 se non è collegato)
         // Il dispositivo si sta caricando?
         // - controller PlayStation e AirPods ce lo dicono loro
-        // - gli altri no: lo capiamo se la batteria è salita (di almeno 3 punti) negli ultimi 20 minuti
+        // - gli altri no: lo capiamo se la batteria è salita (di almeno 3 punti) nell'ultima ora.
+        //   Un'ora perché molte cuffie mandano la batteria a scatti di 10% (uno scatto ogni 15-30 minuti)
         bool StaCaricando(string originale)
         {
             foreach (Dispositivo d in ultimiDati)
@@ -775,7 +777,7 @@ namespace BatterieInBarra
 
             bool salita = inCarica.ContainsKey(originale) && inCarica[originale];
             bool salitaDaPoco = ultimaSalita.ContainsKey(originale)
-                && DateTime.Now - ultimaSalita[originale] < TimeSpan.FromMinutes(20);
+                && DateTime.Now - ultimaSalita[originale] < TimeSpan.FromMinutes(60);
             return salita && salitaDaPoco && BatteriaDi(originale) < 100;
         }
 

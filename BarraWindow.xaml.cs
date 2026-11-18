@@ -22,6 +22,8 @@ namespace BatterieInBarra
         Dictionary<string, Border> elementi = new Dictionary<string, Border>();
         bool mostraPercentuale = true;
         ContextMenu menu;
+        const double LARGHEZZA_NOTIFICHE = 400;   // le notifiche di Windows sono larghe circa 364 + il margine
+        const double LARGHEZZA_MENU = 230;        // il nostro menu (circa)
         MenuItem voceAggiorna;          // "Aggiorna alla versione ..." (si vede solo se c'è una versione nuova)
         Separator separatoreAggiorna;
 
@@ -307,8 +309,20 @@ namespace BatterieInBarra
         void QuandoClicDestro(object sender, MouseButtonEventArgs e)
         {
             ColoriMenu();
+
+            // Il menu si apre sopra la barra, ma a sinistra della zona delle notifiche di Windows:
+            // le notifiche compaiono in basso a destra e, se il menu fosse lì sotto, non potresti cliccarlo.
+            double scala = Finestre.Scala(this);
+            double mouse = PointToScreen(e.GetPosition(this)).X / scala;     // dove hai cliccato
+            double inizioBarra = PointToScreen(new Point(0, 0)).X / scala;   // dove inizia la nostra finestra
+
+            double inizioNotifiche = SystemParameters.WorkArea.Right - LARGHEZZA_NOTIFICHE;
+            double sinistraMenu = Math.Min(mouse - 20, inizioNotifiche - LARGHEZZA_MENU);
+
             menu.PlacementTarget = this;
-            menu.Placement = PlacementMode.MousePoint;
+            menu.Placement = PlacementMode.Top;
+            menu.HorizontalOffset = sinistraMenu - inizioBarra;
+            menu.VerticalOffset = -6;
             menu.IsOpen = true;
             e.Handled = true;
         }
