@@ -90,6 +90,10 @@ namespace BatterieInBarra
             // Se succede un errore, non chiudiamoci in silenzio: lo scriviamo nel registro e lo mostriamo
             DispatcherUnhandledException += QuandoErrore;
             AppDomain.CurrentDomain.UnhandledException += QuandoErroreGrave;
+            TaskScheduler.UnobservedTaskException += QuandoErroreNascosto;
+
+            // Windows si spegne o fai "Esci" dall'account: ci fermiamo subito e in silenzio
+            SessionEnding += QuandoWindowsSiSpegne;
             Registro.Scrivi("Avvio versione " + Aggiornamenti.VersioneAttuale() + " " + string.Join(" ", e.Args));
 
             // Siamo appena stati aggiornati? (la versione vecchia ci avvia con "--aggiornato")
@@ -162,6 +166,7 @@ namespace BatterieInBarra
             timerLettura.Interval = TimeSpan.FromSeconds(OGNI_QUANTI_SECONDI);
             timerLettura.Tick += QuandoTimerLettura;
             timerLettura.Start();
+            orologi.Add(timerLettura);
 
             // Controlla la posizione della barra ogni mezzo secondo
             // (e rimette le batterie davanti, se hai cliccato sulla barra di Windows)
@@ -169,18 +174,21 @@ namespace BatterieInBarra
             timerPosizione.Interval = TimeSpan.FromMilliseconds(500);
             timerPosizione.Tick += QuandoTimerPosizione;
             timerPosizione.Start();
+            orologi.Add(timerPosizione);
 
             // Ogni minuto: promemoria serale
             DispatcherTimer timerPromemoria = new DispatcherTimer();
             timerPromemoria.Interval = TimeSpan.FromMinutes(1);
             timerPromemoria.Tick += QuandoTimerPromemoria;
             timerPromemoria.Start();
+            orologi.Add(timerPromemoria);
 
             // Cerca gli aggiornamenti ogni 6 ore
             DispatcherTimer timerAggiornamenti = new DispatcherTimer();
             timerAggiornamenti.Interval = TimeSpan.FromHours(6);
             timerAggiornamenti.Tick += QuandoTimerAggiornamenti;
             timerAggiornamenti.Start();
+            orologi.Add(timerAggiornamenti);
 
             MostraTutto();
             QuandoTimerLettura(null, null);
@@ -190,10 +198,23 @@ namespace BatterieInBarra
         // Errore nelle finestre: lo scriviamo, lo mostriamo e l'app continua
         bool erroreGiaMostrato = false;
 
+        // Diventa true quando Windows si spegne: da lì in poi niente più finestre di errore
+        bool staChiudendo = false;
+
+        // I timer (lettura, posizione, promemoria, aggiornamenti): li fermiamo quando ci chiudiamo
+        List<DispatcherTimer> orologi = new List<DispatcherTimer>();
+
         void QuandoErrore(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             Registro.Scrivi("ERRORE: " + e.Exception);
             e.Handled = true;
+
+            // Mentre Windows si spegne gli errori sono normali (il Bluetooth si sta fermando):
+            // niente finestra, altrimenti Windows aspetta che premi OK e non si spegne
+            if (staChiudendo || Dispatcher.HasShutdownStarted)
+            {
+                return;
+            }
 
             // Il messaggio lo mostriamo una volta sola (se l'errore si ripete non ti riempiamo lo schermo)
             if (erroreGiaMostrato)
@@ -203,6 +224,38 @@ namespace BatterieInBarra
             erroreGiaMostrato = true;
             MessageBox.Show(Testi.T("errore_generico") + "\n\n" + e.Exception.Message,
                 "Batterie in Barra", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        // Errore dentro un lavoro in sottofondo che nessuno ha controllato: lo scriviamo e basta
+        void QuandoErroreNascosto(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            Registro.Scrivi("ERRORE (in sottofondo): " + e.Exception);
+            e.SetObserved();
+        }
+
+        // Windows si sta spegnendo (o stai uscendo dall'account)
+        void QuandoWindowsSiSpegne(object sender, SessionEndingCancelEventArgs e)
+        {
+            Registro.Scrivi("Windows si spegne: chiudo l'app");
+            FermaTutto();
+            Shutdown();
+        }
+
+        // Ferma timer e Bluetooth: dopo non partono più letture
+        void FermaTutto()
+        {
+            staChiudendo = true;
+            foreach (DispatcherTimer orologio in orologi)
+            {
+                orologio.Stop();
+            }
+            try
+            {
+                AirPods.Ferma();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         // Errore grave (l'app si chiuderà): almeno lo scriviamo nel registro
@@ -217,7 +270,14 @@ namespace BatterieInBarra
             while (true)
             {
                 segnaleApri.WaitOne();
-                Dispatcher.Invoke(new Action(ApriImpostazioni));
+                try
+                {
+                    Dispatcher.Invoke(new Action(ApriImpostazioni));
+                }
+                catch (Exception)
+                {
+                    return;   // l'app si sta chiudendo
+                }
             }
         }
 
@@ -260,7 +320,7 @@ namespace BatterieInBarra
 
         public async Task Aggiorna()
         {
-            if (staLeggendo)
+            if (staLeggendo || staChiudendo)
             {
                 return;
             }
@@ -269,6 +329,10 @@ namespace BatterieInBarra
             try
             {
                 List<Dispositivo> lista = await Batterie.Leggi();
+                if (staChiudendo)
+                {
+                    return;   // Windows si è spento mentre leggevamo
+                }
                 ultimiDati = lista;
 
                 foreach (Dispositivo d in lista)
@@ -1024,6 +1088,7 @@ namespace BatterieInBarra
 
         public void Esci()
         {
+            FermaTutto();
             Shutdown();
         }
     }

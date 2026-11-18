@@ -1,9 +1,15 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.4).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.6).
 La sezione della versione diventa la descrizione della release su GitHub.
 
-## 0.3.4 — 18/11/2026 (foto nella descrizione)
+## 0.3.6 — 18/11/2026 (spegnimento del PC sistemato)
+- **Il PC si spegne senza problemi**: prima, spegnendo il computer, a volte l'app mostrava una finestra di errore
+  (il Bluetooth si stava già fermando) e Windows aspettava che la chiudessi prima di spegnersi.
+  Adesso, quando Windows si spegne, l'app si ferma subito e in silenzio.
+- Gli errori dei lavori in sottofondo vengono scritti nel registro invece di far chiudere l'app.
+
+## 0.3.5 — 18/11/2026 (foto nella descrizione)
 - **Foto nella pagina del progetto e nelle release**: la barra con le batterie, il widget, il menu e le impostazioni,
   così si vede subito com'è l'app.
 
