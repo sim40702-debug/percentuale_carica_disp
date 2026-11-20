@@ -31,12 +31,12 @@ Le **impostazioni**, divise in Dispositivi, Aspetto, Avvisi e Generale.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.7 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.8 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.3.7" && git push && git tag v0.3.7 && git push origin v0.3.7
+   git pull && git add . && git commit -m "Versione 0.3.8" && git push && git tag v0.3.8 && git push origin v0.3.8
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.7" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.8" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.

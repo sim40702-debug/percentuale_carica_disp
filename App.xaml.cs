@@ -68,6 +68,7 @@ namespace BatterieInBarra
         Dictionary<string, int> minimoDaUltimaCarica = new Dictionary<string, int>();
         Dictionary<string, bool> inCarica = new Dictionary<string, bool>();
         Dictionary<string, DateTime> ultimaSalita = new Dictionary<string, DateTime>();   // quando la batteria è salita l'ultima volta
+        Dictionary<string, bool> perFulmine = new Dictionary<string, bool>();             // la batteria sta salendo (basta +2): mostriamo il fulmine
         double larghezzaBarra = LARGHEZZA_VUOTA;
         DateTime ultimaChiusuraWidget = DateTime.MinValue;
         bool staLeggendo = false;
@@ -377,6 +378,7 @@ namespace BatterieInBarra
                 {
                     // Si sta scaricando
                     inCarica[nome] = false;
+                    perFulmine[nome] = false;
                     minimoDaUltimaCarica[nome] = Math.Min(minimoDaUltimaCarica[nome], percentuale);
                 }
                 else
@@ -384,6 +386,13 @@ namespace BatterieInBarra
                     if (percentuale > prima.P)
                     {
                         ultimaSalita[nome] = DateTime.Now;
+                    }
+
+                    // Per il fulmine bastano 2 punti in più (così compare prima).
+                    // Per le statistiche delle cariche invece ne servono 3 (qui sotto)
+                    if (percentuale >= minimoDaUltimaCarica[nome] + 2)
+                    {
+                        perFulmine[nome] = true;
                     }
 
                     // È salita di almeno 3 punti rispetto al minimo: è stato caricato
@@ -827,7 +836,7 @@ namespace BatterieInBarra
         // La batteria attuale di un dispositivo (-1 se non è collegato)
         // Il dispositivo si sta caricando?
         // - controller PlayStation e AirPods ce lo dicono loro
-        // - gli altri no: lo capiamo se la batteria è salita (di almeno 3 punti) nell'ultima ora.
+        // - gli altri no: lo capiamo se la batteria è salita (di almeno 2 punti) e l'ultima salita è di meno di un'ora fa.
         //   Un'ora perché molte cuffie mandano la batteria a scatti di 10% (uno scatto ogni 15-30 minuti)
         bool StaCaricando(string originale)
         {
@@ -839,7 +848,7 @@ namespace BatterieInBarra
                 }
             }
 
-            bool salita = inCarica.ContainsKey(originale) && inCarica[originale];
+            bool salita = perFulmine.ContainsKey(originale) && perFulmine[originale];
             bool salitaDaPoco = ultimaSalita.ContainsKey(originale)
                 && DateTime.Now - ultimaSalita[originale] < TimeSpan.FromMinutes(60);
             return salita && salitaDaPoco && BatteriaDi(originale) < 100;
@@ -1033,6 +1042,7 @@ namespace BatterieInBarra
             minimoDaUltimaCarica.Clear();
             inCarica.Clear();
             ultimaSalita.Clear();
+            perFulmine.Clear();
             MostraTutto();
         }
 

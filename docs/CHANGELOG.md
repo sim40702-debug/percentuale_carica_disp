@@ -1,7 +1,13 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.6).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.7).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.3.7 — 20/11/2026 (fulmine più veloce)
+- **Il fulmine compare prima** per cuffie, mouse e tastiere: bastano 2 punti in più invece di 3.
+  Se il dispositivo sale dell'1% al minuto, il fulmine compare dopo circa 2 minuti di carica (prima erano 5-11).
+- Ricorda: per questi dispositivi Windows non sa se sono in carica, quindi l'app lo capisce solo vedendo salire
+  la batteria. Se le cuffie si spengono mentre caricano, o Windows non aggiorna la percentuale, il fulmine non può comparire.
 
 ## 0.3.6 — 18/11/2026 (spegnimento del PC sistemato)
 - **Il PC si spegne senza problemi**: prima, spegnendo il computer, a volte l'app mostrava una finestra di errore
