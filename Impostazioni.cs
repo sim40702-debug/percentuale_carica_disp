@@ -50,6 +50,40 @@ namespace BatterieInBarra
         // Scorciatoia da tastiera Ctrl + Alt + B per aprire il widget
         public bool Scorciatoia { get; set; } = true;
 
+        // Icone: tipo ("cuffie", "controller", "mouse", "tastiera") -> disegno scelto (1, 2 o 3)
+        public Dictionary<string, int> ModelliIcone { get; set; } = new Dictionary<string, int>();
+
+        // Icone caricate da te: tipo -> file PNG (copiato nella cartella dei dati, sottocartella "icone")
+        public Dictionary<string, string> IconePersonali { get; set; } = new Dictionary<string, string>();
+
+        // Il disegno scelto per un tipo. Se non hai scelto: cuffie piene (2), gli altri a linee (1)
+        public int ModelloDi(string tipo)
+        {
+            if (ModelliIcone != null && ModelliIcone.ContainsKey(tipo))
+            {
+                int numero = ModelliIcone[tipo];
+                if (numero >= 1 && numero <= 3)
+                {
+                    return numero;
+                }
+            }
+            if (tipo == "cuffie")
+            {
+                return 2;
+            }
+            return 1;
+        }
+
+        // L'immagine caricata da te per un tipo (null se non c'è o il file è sparito)
+        public string IconaPersonaleDi(string tipo)
+        {
+            if (IconePersonali != null && IconePersonali.ContainsKey(tipo) && File.Exists(IconePersonali[tipo]))
+            {
+                return IconePersonali[tipo];
+            }
+            return null;
+        }
+
 
         // ----- Salvataggio -----
 

@@ -22,6 +22,10 @@ A sinistra il **widget** (clic sulle batterie), a destra il **menu del tasto des
 
 Le **impostazioni**, divise in Dispositivi, Aspetto, Avvisi e Generale.
 
+![Scegli le icone](docs/immagini/icone.png)
+
+In **Aspetto → Icone** scegli uno dei 3 disegni per cuffie, controller, mouse e tastiera, oppure carichi la tua immagine.
+
 ## Dispositivi che legge
 
 - **Cuffie, mouse, tastiere Bluetooth** che Windows conosce (quelli che hanno la batteria nelle Impostazioni di Windows)
@@ -42,12 +46,12 @@ se sono in carica: l'app lo capisce quando vede la batteria salire.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.10 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.4.1 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.3.10" && git push && git tag v0.3.10 && git push origin v0.3.10
+   git pull && git add . && git commit -m "Versione 0.4.1" && git push && git tag v0.4.1 && git push origin v0.4.1
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.10" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.4.1" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.

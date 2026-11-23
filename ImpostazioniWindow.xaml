@@ -312,6 +312,14 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Icone: per ogni tipo i 3 disegni e "Carica..." (le righe le crea il codice) -->
+                <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_icone}" />
+                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo icone_spiegazione}" TextWrapping="Wrap" Margin="4,0,4,8" />
+                <Border Style="{StaticResource Riquadro}">
+                    <StackPanel x:Name="ListaIcone" />
+                </Border>
+                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo icone_nota}" TextWrapping="Wrap" Margin="4,8,4,0" />
+
                 </StackPanel>
 
                 <!-- Pagina: Avvisi -->

@@ -1,7 +1,16 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.9).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.4.0).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.4.0 — 23/11/2026 (scegli le tue icone)
+- **Scegli le icone**: in Impostazioni → Aspetto → Icone ci sono 3 disegni per cuffie, controller, mouse e tastiera
+  (a linee, pieni o con più dettagli). Clicchi quello che ti piace e cambia subito sulla barra e nel widget.
+- **Carica la tua icona**: con "Carica…" puoi usare una tua immagine PNG (quadrata, meglio bianca su sfondo trasparente).
+  Per tornare a un disegno basta cliccarlo.
+- Le cuffie adesso partono con il disegno **pieno**, che si vede meglio da piccolo.
+- "Ripristina impostazioni" toglie anche le icone caricate.
+- Foto della pagina e delle release aggiornate.
 
 ## 0.3.9 — 23/11/2026 (icona delle cuffie nuova)
 - **Icona delle cuffie rifatta**, con i padiglioni più morbidi: si vede meglio sulla barra e nel widget.

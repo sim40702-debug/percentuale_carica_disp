@@ -317,6 +317,7 @@ namespace BatterieInBarra
             Grafica.SogliaGiallo = Opzioni.SogliaGiallo;
             Grafica.SogliaRosso = Opzioni.SogliaRosso;
             Grafica.TuttoBianco = Opzioni.TuttoBianco;
+            Grafica.Scelte = Opzioni;   // per le icone scelte da te
         }
 
 
@@ -1053,6 +1054,20 @@ namespace BatterieInBarra
         public void RipristinaImpostazioni()
         {
             List<string> visti = Opzioni.Visti;
+
+            // Le icone caricate da te non servono più
+            try
+            {
+                string icone = System.IO.Path.Combine(Impostazioni.Cartella(), "icone");
+                if (System.IO.Directory.Exists(icone))
+                {
+                    System.IO.Directory.Delete(icone, true);
+                }
+            }
+            catch (Exception)
+            {
+            }
+
             Opzioni = new Impostazioni();
             Opzioni.Visti = visti;
             Opzioni.Salva();

@@ -5,6 +5,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
 namespace BatterieInBarra
@@ -146,39 +147,173 @@ namespace BatterieInBarra
             return false;
         }
 
-        // Crea l'icona del dispositivo, grande "lato" pixel
-        public static FrameworkElement CreaIcona(string nome, double lato, Brush colore)
+        // ----- I 3 disegni che puoi scegliere per cuffie, controller, mouse e tastiera -----
+        // Ogni disegno ha due parti: "linee" (solo il contorno) e "pieno" (parti colorate dentro).
+        // "F0" all'inizio vuol dire: i buchi dentro restano vuoti (es. i tasti della tastiera piena)
+
+        // I tipi che si possono personalizzare (stesso ordine delle Impostazioni)
+        public static readonly string[] TIPI_PERSONALIZZABILI = { "cuffie", "controller", "mouse", "tastiera" };
+
+        // Le impostazioni (le mette App): servono per sapere che disegno hai scelto
+        public static Impostazioni Scelte = null;
+
+        // Restituisce { linee, pieno } del disegno "numero" (1, 2 o 3) di un tipo
+        public static string[] Disegno(string tipo, int numero)
         {
-            string disegno = BLUETOOTH;
-            switch (TipoDispositivo(nome))
+            if (tipo == "cuffie")
             {
-                case "auricolari": disegno = AURICOLARI; break;
-                case "cuffie": disegno = CUFFIE; break;
-                case "tastiera": disegno = TASTIERA; break;
-                case "mouse": disegno = MOUSE; break;
-                case "controller": disegno = CONTROLLER; break;
-                case "portatile": disegno = PORTATILE; break;
+                if (numero == 1)
+                {
+                    return new string[] { CUFFIE, "" };
+                }
+                if (numero == 2)
+                {
+                    string padiglioni = "M5.25 14 A2.25 2.25 0 0 1 7.5 16.25 V18.75 A2.25 2.25 0 0 1 3 18.75 V16.25 A2.25 2.25 0 0 1 5.25 14 Z " +
+                        "M18.75 14 A2.25 2.25 0 0 1 21 16.25 V18.75 A2.25 2.25 0 0 1 16.5 18.75 V16.25 A2.25 2.25 0 0 1 18.75 14 Z";
+                    return new string[] { "M3.5 16 V12.5 A8.5 8.5 0 0 1 20.5 12.5 V16 " + padiglioni, padiglioni };
+                }
+                return new string[] { "M4 15 V12 A8 8 0 0 1 20 12 V15 " +
+                    "M4.5 13.5 H5.5 A2 2 0 0 1 7.5 15.5 V19 A2 2 0 0 1 5.5 21 H4.5 A2 2 0 0 1 2.5 19 V15.5 A2 2 0 0 1 4.5 13.5 Z " +
+                    "M18.5 13.5 H19.5 A2 2 0 0 1 21.5 15.5 V19 A2 2 0 0 1 19.5 21 H18.5 A2 2 0 0 1 16.5 19 V15.5 A2 2 0 0 1 18.5 13.5 Z", "" };
+            }
+            if (tipo == "controller")
+            {
+                if (numero == 1)
+                {
+                    return new string[] { CONTROLLER, "" };
+                }
+                if (numero == 2)
+                {
+                    return new string[] { "", "F0 M6 7.5 H18 A4.5 4.5 0 0 1 22.5 12 L21.7 16.7 A2.5 2.5 0 0 1 17.4 18 L15.2 15.5 H8.8 L6.6 18 A2.5 2.5 0 0 1 2.3 16.7 L1.5 12 A4.5 4.5 0 0 1 6 7.5 Z " +
+                        "M6.8 10 H8.2 V11.5 H9.7 V12.9 H8.2 V14.4 H6.8 V12.9 H5.3 V11.5 H6.8 Z " +
+                        "M15 10.2 A1 1 0 1 0 17 10.2 A1 1 0 1 0 15 10.2 Z M17 12.4 A1 1 0 1 0 19 12.4 A1 1 0 1 0 17 12.4 Z" };
+                }
+                return new string[] { "M7 7 H17 C20 7 22 10 22 14 C22 17 20 18.5 18 17 L16 15.5 H8 L6 17 C4 18.5 2 17 2 14 C2 10 4 7 7 7 Z " +
+                    "M6.2 11.5 A1.6 1.6 0 1 0 9.4 11.5 A1.6 1.6 0 1 0 6.2 11.5 Z M12.7 13 A1.3 1.3 0 1 0 15.3 13 A1.3 1.3 0 1 0 12.7 13 Z " +
+                    "M16.8 10 H16.81 M18.6 11.6 H18.61", "" };
+            }
+            if (tipo == "mouse")
+            {
+                if (numero == 1)
+                {
+                    return new string[] { MOUSE, "" };
+                }
+                if (numero == 2)
+                {
+                    return new string[] { "", "F0 M12 2.5 A6.5 6.5 0 0 1 18.5 9 V15 A6.5 6.5 0 0 1 5.5 15 V9 A6.5 6.5 0 0 1 12 2.5 Z M11.1 6 H12.9 V11 H11.1 Z" };
+                }
+                return new string[] { "M12 3 A6 6 0 0 1 18 9 V15 A6 6 0 0 1 6 15 V9 A6 6 0 0 1 12 3 Z M6 10 H18 M12 3 V10", "" };
+            }
+            if (tipo == "tastiera")
+            {
+                if (numero == 1)
+                {
+                    return new string[] { TASTIERA, "" };
+                }
+                if (numero == 2)
+                {
+                    return new string[] { "", "F0 M4.5 5.5 H19.5 A3 3 0 0 1 22.5 8.5 V15.5 A3 3 0 0 1 19.5 18.5 H4.5 A3 3 0 0 1 1.5 15.5 V8.5 A3 3 0 0 1 4.5 5.5 Z " +
+                        "M5 9 H7 V11 H5 Z M9 9 H11 V11 H9 Z M13 9 H15 V11 H13 Z M17 9 H19 V11 H17 Z M7 13.5 H17 V15.3 H7 Z" };
+                }
+                return new string[] { "M4.5 6 H19.5 A2.5 2.5 0 0 1 22 8.5 V15.5 A2.5 2.5 0 0 1 19.5 18 H4.5 A2.5 2.5 0 0 1 2 15.5 V8.5 A2.5 2.5 0 0 1 4.5 6 Z " +
+                    "M5.5 9.5 H6.5 M8.5 9.5 H9.5 M11.5 9.5 H12.5 M14.5 9.5 H15.5 M17.5 9.5 H18.5 " +
+                    "M5.5 12 H6.5 M8.5 12 H9.5 M11.5 12 H12.5 M14.5 12 H15.5 M17.5 12 H18.5 M7.5 14.8 H16.5", "" };
             }
 
-            System.Windows.Shapes.Path linee = new System.Windows.Shapes.Path();
-            linee.Data = Geometry.Parse(disegno);
-            linee.Stroke = colore;
-            linee.StrokeThickness = 1.8;
-            linee.StrokeLineJoin = PenLineJoin.Round;
-            linee.StrokeStartLineCap = PenLineCap.Round;
-            linee.StrokeEndLineCap = PenLineCap.Round;
+            // Gli altri tipi hanno un solo disegno
+            switch (tipo)
+            {
+                case "auricolari": return new string[] { AURICOLARI, "" };
+                case "portatile": return new string[] { PORTATILE, "" };
+            }
+            return new string[] { BLUETOOTH, "" };
+        }
+
+        // Crea l'icona del dispositivo, grande "lato" pixel (usa il disegno scelto nelle Impostazioni)
+        public static FrameworkElement CreaIcona(string nome, double lato, Brush colore)
+        {
+            string tipo = TipoDispositivo(nome);
+            if (Scelte == null)
+            {
+                Scelte = new Impostazioni();   // non ancora pronte: usiamo i disegni di base
+            }
+
+            // Hai caricato una tua immagine per questo tipo?
+            string personale = Scelte.IconaPersonaleDi(tipo);
+            if (personale != null)
+            {
+                FrameworkElement immagine = CreaImmagine(personale, lato);
+                if (immagine != null)
+                {
+                    return immagine;
+                }
+            }
+            return CreaIconaTipo(tipo, Scelte.ModelloDi(tipo), lato, colore);
+        }
+
+        // Crea il disegno "numero" di un tipo (lo usano anche le Impostazioni per far vedere i 3 disegni)
+        public static FrameworkElement CreaIconaTipo(string tipo, int numero, double lato, Brush colore)
+        {
+            string[] disegno = Disegno(tipo, numero);
 
             // Il disegno è 24x24: lo mettiamo in una tela 24x24 e lo ingrandiamo alla misura giusta
             Canvas tela = new Canvas();
             tela.Width = 24;
             tela.Height = 24;
-            tela.Children.Add(linee);
+
+            // Parte piena
+            if (disegno[1] != "")
+            {
+                System.Windows.Shapes.Path pieno = new System.Windows.Shapes.Path();
+                pieno.Data = Geometry.Parse(disegno[1]);
+                pieno.Fill = colore;
+                tela.Children.Add(pieno);
+            }
+
+            // Contorno
+            if (disegno[0] != "")
+            {
+                System.Windows.Shapes.Path linee = new System.Windows.Shapes.Path();
+                linee.Data = Geometry.Parse(disegno[0]);
+                linee.Stroke = colore;
+                linee.StrokeThickness = 1.8;
+                linee.StrokeLineJoin = PenLineJoin.Round;
+                linee.StrokeStartLineCap = PenLineCap.Round;
+                linee.StrokeEndLineCap = PenLineCap.Round;
+                tela.Children.Add(linee);
+            }
 
             Viewbox scatola = new Viewbox();
             scatola.Width = lato;
             scatola.Height = lato;
             scatola.Child = tela;
             return scatola;
+        }
+
+        // Un'immagine PNG caricata da te (null se non si riesce ad aprirla)
+        public static FrameworkElement CreaImmagine(string file, double lato)
+        {
+            try
+            {
+                BitmapImage foto = new BitmapImage();
+                foto.BeginInit();
+                foto.CacheOption = BitmapCacheOption.OnLoad;               // legge subito il file e non lo tiene aperto
+                foto.CreateOptions = BitmapCreateOptions.IgnoreImageCache;  // se la cambi, si vede quella nuova
+                foto.UriSource = new Uri(file);
+                foto.EndInit();
+
+                Image immagine = new Image();
+                immagine.Source = foto;
+                immagine.Width = lato;
+                immagine.Height = lato;
+                immagine.Stretch = Stretch.Uniform;
+                RenderOptions.SetBitmapScalingMode(immagine, BitmapScalingMode.HighQuality);
+                return immagine;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
 

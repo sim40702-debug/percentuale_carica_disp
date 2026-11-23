@@ -85,6 +85,8 @@ jobs:
             echo "<img src=\"$foto/widget.png\" width=\"340\" alt=\"Il widget\"> <img src=\"$foto/menu.png\" width=\"240\" alt=\"Il menu del tasto destro\">"
             echo ""
             echo "![Le impostazioni]($foto/impostazioni.png)"
+            echo ""
+            echo "![Scegli le icone]($foto/icone.png)"
           } >> notes.md
 
           app="BatterieInBarra-$VERSIONE.exe"

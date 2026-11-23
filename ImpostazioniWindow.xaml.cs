@@ -3,6 +3,7 @@
 // Ogni modifica viene salvata subito (non c'è un pulsante "Salva"), come su Apple.
 
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -72,6 +73,7 @@ namespace BatterieInBarra
             Alle8.IsChecked = opzioni.SilenzioAlle == 8;
 
             MostraDispositivi();
+            MostraIcone();
             MostraAggiornamenti();
             MostraSpazio();
             staCaricando = false;
@@ -137,6 +139,198 @@ namespace BatterieInBarra
         Brush Colore(string nome)
         {
             return (Brush)Resources[nome];
+        }
+
+
+        // ----- Icone (pagina Aspetto) -----
+
+        // Una riga per tipo: nome, i 3 disegni e "Carica..."
+        void MostraIcone()
+        {
+            ListaIcone.Children.Clear();
+            bool prima = true;
+
+            foreach (string tipo in Grafica.TIPI_PERSONALIZZABILI)
+            {
+                if (!prima)
+                {
+                    Border linea = new Border();
+                    linea.Style = (Style)Resources["Separatore"];
+                    ListaIcone.Children.Add(linea);
+                }
+                prima = false;
+
+                Grid riga = new Grid();
+                riga.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) });
+                riga.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+                TextBlock nome = new TextBlock();
+                nome.Style = (Style)Resources["TitoloRiga"];
+                nome.Text = Testi.T("tipo_" + tipo);
+                nome.VerticalAlignment = VerticalAlignment.Center;
+                riga.Children.Add(nome);
+
+                StackPanel scelte = new StackPanel();
+                scelte.Orientation = Orientation.Horizontal;
+                Grid.SetColumn(scelte, 1);
+                riga.Children.Add(scelte);
+
+                string personale = opzioni.IconaPersonaleDi(tipo);
+
+                // I 3 disegni
+                for (int numero = 1; numero <= 3; numero++)
+                {
+                    bool scelto = personale == null && opzioni.ModelloDi(tipo) == numero;
+                    FrameworkElement disegno = Grafica.CreaIconaTipo(tipo, numero, 28, Colore("Testo"));
+                    scelte.Children.Add(CreaRiquadroIcona(disegno, scelto, tipo, numero));
+                }
+
+                // "Carica...": se hai già caricato un'immagine si vede lei
+                FrameworkElement carica = null;
+                if (personale != null)
+                {
+                    carica = Grafica.CreaImmagine(personale, 28);
+                }
+                if (carica == null)
+                {
+                    StackPanel piu = new StackPanel();
+                    piu.VerticalAlignment = VerticalAlignment.Center;
+                    TextBlock segno = new TextBlock();
+                    segno.Text = "+";
+                    segno.FontSize = 20;
+                    segno.Foreground = Colore("TestoGrigio");
+                    segno.HorizontalAlignment = HorizontalAlignment.Center;
+                    TextBlock scritta = new TextBlock();
+                    scritta.Text = Testi.T("carica_icona");
+                    scritta.FontSize = 11;
+                    scritta.Foreground = Colore("TestoGrigio");
+                    scritta.HorizontalAlignment = HorizontalAlignment.Center;
+                    piu.Children.Add(segno);
+                    piu.Children.Add(scritta);
+                    carica = piu;
+                }
+                scelte.Children.Add(CreaRiquadroIcona(carica, personale != null, tipo, 0));
+
+                ListaIcone.Children.Add(riga);
+            }
+        }
+
+        // Un quadratino cliccabile. "numero" = 1, 2, 3 per i disegni, 0 per "Carica..."
+        Border CreaRiquadroIcona(FrameworkElement contenuto, bool scelto, string tipo, int numero)
+        {
+            contenuto.HorizontalAlignment = HorizontalAlignment.Center;
+            contenuto.VerticalAlignment = VerticalAlignment.Center;
+
+            Border riquadro = new Border();
+            riquadro.Width = 64;
+            riquadro.Height = 58;
+            riquadro.CornerRadius = new CornerRadius(10);
+            riquadro.Margin = new Thickness(0, 8, 10, 8);
+            riquadro.Background = Colore("SfondoCampo");
+            riquadro.Cursor = Cursors.Hand;
+            riquadro.Tag = tipo + "|" + numero;
+            riquadro.Child = contenuto;
+            riquadro.MouseLeftButtonUp += QuandoScegliIcona;
+
+            if (scelto)
+            {
+                riquadro.BorderThickness = new Thickness(2);
+                riquadro.BorderBrush = Grafica.Pennello("#0A84FF");   // blu: è quello scelto
+            }
+            else
+            {
+                riquadro.BorderThickness = new Thickness(1);
+                riquadro.BorderBrush = Colore("Linea");
+            }
+            if (numero == 0)
+            {
+                riquadro.ToolTip = Testi.T("scegli_immagine");
+            }
+            return riquadro;
+        }
+
+        void QuandoScegliIcona(object sender, MouseButtonEventArgs e)
+        {
+            string[] parti = ((string)((Border)sender).Tag).Split('|');
+            string tipo = parti[0];
+            int numero = int.Parse(parti[1]);
+
+            if (numero == 0)
+            {
+                CaricaIcona(tipo);
+                return;
+            }
+
+            // Hai scelto un disegno: la tua immagine (se c'era) non serve più e la togliamo
+            opzioni.ModelliIcone[tipo] = numero;
+            TogliIconaPersonale(tipo);
+            IconeCambiate();
+        }
+
+        // Scegli un PNG dal PC: lo copiamo nella cartella dei dati (così funziona anche se sposti l'originale)
+        void CaricaIcona(string tipo)
+        {
+            Microsoft.Win32.OpenFileDialog finestra = new Microsoft.Win32.OpenFileDialog();
+            finestra.Title = Testi.T("scegli_immagine");
+            finestra.Filter = "PNG (*.png)|*.png";
+            if (finestra.ShowDialog(this) != true)
+            {
+                return;
+            }
+
+            // Al massimo 2 MB: un'icona non ha bisogno di più
+            if (new FileInfo(finestra.FileName).Length > 2 * 1024 * 1024)
+            {
+                MessageBox.Show(this, Testi.T("immagine_grande"), Testi.T("sezione_icone"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Si riesce ad aprire?
+            if (Grafica.CreaImmagine(finestra.FileName, 28) == null)
+            {
+                MessageBox.Show(this, Testi.T("immagine_non_valida"), Testi.T("sezione_icone"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                string cartella = Path.Combine(Impostazioni.Cartella(), "icone");
+                Directory.CreateDirectory(cartella);
+                string copia = Path.Combine(cartella, tipo + ".png");
+                File.Copy(finestra.FileName, copia, true);
+
+                opzioni.IconePersonali[tipo] = copia;
+                IconeCambiate();
+            }
+            catch (Exception errore)
+            {
+                Registro.Scrivi("Icona non caricata: " + errore.Message);
+                MessageBox.Show(this, Testi.T("immagine_non_valida"), Testi.T("sezione_icone"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        void TogliIconaPersonale(string tipo)
+        {
+            string file = opzioni.IconaPersonaleDi(tipo);
+            opzioni.IconePersonali.Remove(tipo);
+            if (file != null)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
+        // Salviamo e aggiorniamo barra, widget e le liste di questa finestra
+        void IconeCambiate()
+        {
+            App.Corrente.ImpostazioniCambiate();
+            MostraIcone();
+            MostraDispositivi();
         }
 
 

@@ -139,5 +139,39 @@ namespace BatterieInBarra.Test
             Assert.Equal("cuffie", Grafica.TipoDispositivo("WH-1000XM5"));
             Assert.Equal("controller", Grafica.TipoDispositivo("Xbox Wireless Controller"));
         }
+
+        [Fact]
+        public void Icone_di_base_e_scelta()
+        {
+            Impostazioni opzioni = new Impostazioni();
+            // Di base: cuffie piene (2), gli altri a linee (1)
+            Assert.Equal(2, opzioni.ModelloDi("cuffie"));
+            Assert.Equal(1, opzioni.ModelloDi("mouse"));
+
+            opzioni.ModelliIcone["mouse"] = 3;
+            Assert.Equal(3, opzioni.ModelloDi("mouse"));
+
+            // Un numero sbagliato torna a quello di base
+            opzioni.ModelliIcone["tastiera"] = 7;
+            Assert.Equal(1, opzioni.ModelloDi("tastiera"));
+
+            // Un'immagine caricata che non esiste più viene ignorata
+            opzioni.IconePersonali["cuffie"] = "C:\\non\\esiste.png";
+            Assert.Null(opzioni.IconaPersonaleDi("cuffie"));
+        }
+
+        [Fact]
+        public void Ogni_tipo_ha_3_disegni_diversi()
+        {
+            foreach (string tipo in Grafica.TIPI_PERSONALIZZABILI)
+            {
+                string uno = string.Join("|", Grafica.Disegno(tipo, 1));
+                string due = string.Join("|", Grafica.Disegno(tipo, 2));
+                string tre = string.Join("|", Grafica.Disegno(tipo, 3));
+                Assert.NotEqual(uno, due);
+                Assert.NotEqual(due, tre);
+                Assert.NotEqual(uno, tre);
+            }
+        }
     }
 }
