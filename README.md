@@ -8,6 +8,11 @@ delle ultime 24 ore.
 
 Scritta in **C# (WPF, .NET 10)**: leggera, senza PowerShell né browser dentro.
 
+> **English:** small Apple-style battery icons for your Bluetooth headphones, AirPods, keyboard, mouse and
+> controllers (PlayStation and Xbox), **right on the Windows taskbar**. Click them for a widget with rings,
+> estimated time and a 24-hour graph. The app is available in English, Italian and German
+> (Settings → General → Language). Download it from the **Releases** page: it updates by itself.
+
 ## Come si vede
 
 ![Le batterie sulla barra di Windows](docs/immagini/barra.png)
@@ -25,6 +30,10 @@ Le **impostazioni**, divise in Dispositivi, Aspetto, Avvisi e Generale.
 ![Scegli le icone](docs/immagini/icone.png)
 
 In **Aspetto → Icone** scegli uno dei 3 disegni per cuffie, controller, mouse e tastiera, oppure carichi la tua immagine.
+
+![Scegli la lingua](docs/immagini/lingua.png)
+
+In **Generale → Lingua** scegli l'italiano, l'inglese o il tedesco, anche se Windows è in un'altra lingua.
 
 ## Dispositivi che legge
 
@@ -46,12 +55,13 @@ se sono in carica: l'app lo capisce quando vede la batteria salire.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.4.1 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.4.2 — data (titolo)`.
+   Se vuoi una foto nella release, metti l'immagine in `docs/immagini` e scrivi nella sezione `![descrizione](immagini/nome.png)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.4.1" && git push && git tag v0.4.1 && git push origin v0.4.1
+   git pull && git add . && git commit -m "Versione 0.4.2" && git push && git tag v0.4.2 && git push origin v0.4.2
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.4.1" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.4.2" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.

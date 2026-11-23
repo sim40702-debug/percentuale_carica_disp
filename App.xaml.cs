@@ -102,6 +102,8 @@ namespace BatterieInBarra
 
             // Siamo appena stati aggiornati? (la versione vecchia ci avvia con "--aggiornato")
             bool dopoAggiornamento = Array.IndexOf(e.Args, "--aggiornato") >= 0;
+            // Ci siamo riavviati da soli (es. hai cambiato lingua)?
+            bool dopoRiavvio = Array.IndexOf(e.Args, "--riavvio") >= 0;
 
             // Una sola copia dell'app aperta.
             // Dopo un aggiornamento aspettiamo fino a 10 secondi che la versione vecchia si chiuda.
@@ -109,7 +111,7 @@ namespace BatterieInBarra
             bool libero;
             try
             {
-                libero = unaSolaCopia.WaitOne(dopoAggiornamento ? 10000 : 0);
+                libero = unaSolaCopia.WaitOne(dopoAggiornamento || dopoRiavvio ? 10000 : 0);
             }
             catch (AbandonedMutexException)
             {
@@ -140,6 +142,7 @@ namespace BatterieInBarra
 
             Opzioni = Impostazioni.Leggi();
             Opzioni.Salva();
+            Testi.ImpostaLingua(Opzioni.Lingua);   // prima di aprire le finestre
             cronologia = new Cronologia();
             statistiche = new Statistiche();
             Avvisi.Prepara();
@@ -158,6 +161,12 @@ namespace BatterieInBarra
 
             barra = new BarraWindow();
             widget = new WidgetWindow();
+
+            // Dopo il riavvio (es. per la lingua) riapriamo le Impostazioni, così vedi subito il cambio
+            if (dopoRiavvio)
+            {
+                Dispatcher.BeginInvoke(new Action(ApriImpostazioni), DispatcherPriority.ApplicationIdle);
+            }
 
             // Clic su una notifica: apre il widget su quel dispositivo
             Avvisi.QuandoCliccata = QuandoCliccaNotifica;
@@ -1113,6 +1122,21 @@ namespace BatterieInBarra
 
 
         // ----- Uscita -----
+
+        // Chiude l'app e la riapre (con le Impostazioni aperte), es. dopo aver cambiato lingua
+        public void Riavvia()
+        {
+            try
+            {
+                Process.Start(Environment.ProcessPath, "--riavvio");
+            }
+            catch (Exception errore)
+            {
+                Registro.Scrivi("Riavvio non riuscito: " + errore.Message);
+                return;
+            }
+            Esci();
+        }
 
         public void Esci()
         {

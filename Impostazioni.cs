@@ -50,6 +50,9 @@ namespace BatterieInBarra
         // Scorciatoia da tastiera Ctrl + Alt + B per aprire il widget
         public bool Scorciatoia { get; set; } = true;
 
+        // Lingua dell'app: "auto" (quella di Windows), "it", "en" o "de"
+        public string Lingua { get; set; } = "auto";
+
         // Icone: tipo ("cuffie", "controller", "mouse", "tastiera") -> disegno scelto (1, 2 o 3)
         public Dictionary<string, int> ModelliIcone { get; set; } = new Dictionary<string, int>();
 

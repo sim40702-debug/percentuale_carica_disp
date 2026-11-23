@@ -75,19 +75,10 @@ jobs:
             echo "Versione $VERSIONE di Batterie in Barra." > notes.md
           fi
 
-          # Sotto le novità mettiamo le foto (prese da docs/immagini, com'erano in questa versione)
-          foto="https://raw.githubusercontent.com/${{ github.repository }}/$TAG/docs/immagini"
-          {
-            echo ""
-            echo "### Come si vede"
-            echo "![Le batterie sulla barra di Windows]($foto/barra.png)"
-            echo ""
-            echo "<img src=\"$foto/widget.png\" width=\"340\" alt=\"Il widget\"> <img src=\"$foto/menu.png\" width=\"240\" alt=\"Il menu del tasto destro\">"
-            echo ""
-            echo "![Le impostazioni]($foto/impostazioni.png)"
-            echo ""
-            echo "![Scegli le icone]($foto/icone.png)"
-          } >> notes.md
+          # Le foto: solo quelle scritte nella sezione della versione (es. ![...](immagini/lingua.png)).
+          # Nel CHANGELOG il percorso è "immagini/...": qui lo trasformiamo nell'indirizzo completo su GitHub
+          foto="https://raw.githubusercontent.com/${{ github.repository }}/$TAG/docs/immagini/"
+          sed -i "s#](immagini/#]($foto#g" notes.md
 
           app="BatterieInBarra-$VERSIONE.exe"
           installer="uscita-installer/BatterieInBarra-Setup-$VERSIONE.exe"

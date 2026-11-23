@@ -18,6 +18,28 @@ namespace BatterieInBarra
         // 0 = italiano, 1 = inglese, 2 = tedesco
         static int lingua = SceltaLingua();
 
+        // Cambia la lingua: "it", "en", "de" oppure "auto" (quella di Windows).
+        // Va chiamata prima di aprire le finestre (le scritte vengono lette quando si aprono)
+        public static void ImpostaLingua(string codice)
+        {
+            if (codice == "it")
+            {
+                lingua = 0;
+            }
+            else if (codice == "en")
+            {
+                lingua = 1;
+            }
+            else if (codice == "de")
+            {
+                lingua = 2;
+            }
+            else
+            {
+                lingua = SceltaLingua();
+            }
+        }
+
         static int SceltaLingua()
         {
             string codice = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -150,6 +172,12 @@ namespace BatterieInBarra
             { "immagine_non_valida", new[] { "Non riesco ad aprire questa immagine. Prova con un altro file PNG.",
                 "This image can't be opened. Try another PNG file.",
                 "Dieses Bild lässt sich nicht öffnen. Versuche eine andere PNG-Datei." } },
+            { "lingua", new[] { "Lingua", "Language", "Sprache" } },
+            { "lingua_sotto", new[] { "Automatica = la stessa lingua di Windows", "Automatic = the same language as Windows", "Automatisch = dieselbe Sprache wie Windows" } },
+            { "lingua_auto", new[] { "Automatica", "Automatic", "Automatisch" } },
+            { "conferma_lingua", new[] { "Per cambiare lingua l'app deve riavviarsi. Riavvio adesso?",
+                "The app needs to restart to change language. Restart now?",
+                "Die App muss neu starten, um die Sprache zu ändern. Jetzt neu starten?" } },
             { "titolo_impostazioni", new[] { "Batterie in Barra - Impostazioni", "Batterie in Barra - Settings", "Batterie in Barra - Einstellungen" } },
             { "sezione_dispositivi", new[] { "DISPOSITIVI", "DEVICES", "GERÄTE" } },
             { "sulla_barra", new[] { "Sulla barra", "On taskbar", "In Taskleiste" } },

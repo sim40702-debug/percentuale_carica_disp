@@ -61,6 +61,11 @@ namespace BatterieInBarra
             Rosso20.IsChecked = opzioni.SogliaRosso == 20;
             AggiornaSceltaGiallo();
 
+            LinguaAuto.IsChecked = opzioni.Lingua != "it" && opzioni.Lingua != "en" && opzioni.Lingua != "de";
+            LinguaIt.IsChecked = opzioni.Lingua == "it";
+            LinguaEn.IsChecked = opzioni.Lingua == "en";
+            LinguaDe.IsChecked = opzioni.Lingua == "de";
+
             Ora21.IsChecked = opzioni.OraPromemoria == 21;
             Ora22.IsChecked = opzioni.OraPromemoria == 22;
             Ora23.IsChecked = opzioni.OraPromemoria == 23;
@@ -139,6 +144,33 @@ namespace BatterieInBarra
         Brush Colore(string nome)
         {
             return (Brush)Resources[nome];
+        }
+
+
+        // ----- Lingua (pagina Generale) -----
+
+        void QuandoCambiaLingua(object sender, RoutedEventArgs e)
+        {
+            if (staCaricando)
+            {
+                return;
+            }
+            string codice = (string)((RadioButton)sender).Tag;
+            if (codice == opzioni.Lingua)
+            {
+                return;
+            }
+
+            opzioni.Lingua = codice;
+            App.Corrente.ImpostazioniCambiate();
+
+            // Le scritte cambiano solo riaprendo le finestre: chiediamo se riavviare adesso
+            MessageBoxResult risposta = MessageBox.Show(this, Testi.T("conferma_lingua"), Testi.T("lingua"),
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (risposta == MessageBoxResult.Yes)
+            {
+                App.Corrente.Riavvia();
+            }
         }
 
 

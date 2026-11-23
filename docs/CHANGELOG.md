@@ -1,7 +1,21 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.4.0).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.4.1).
 La sezione della versione diventa la descrizione della release su GitHub.
+Per mettere una foto nella release scrivi nella sezione `![descrizione](immagini/nome.png)` (le foto stanno in `docs/immagini`):
+nella release compaiono solo le foto scritte lì.
+
+## 0.4.1 — 23/11/2026 (scegli la lingua)
+- **Scegli la lingua dell'app**: in Impostazioni → Generale → Lingua puoi mettere Italiano, English o Deutsch,
+  anche se Windows è in un'altra lingua. "Automatica" usa la lingua di Windows, come prima.
+- Quando cambi lingua l'app chiede di riavviarsi e riapre da sola le Impostazioni.
+
+![Scegli la lingua](immagini/lingua.png)
+
+**English**
+- **Choose the app language**: in Settings → General → Language you can pick Italiano, English or Deutsch,
+  even if Windows uses another language. "Automatic" uses the Windows language, as before.
+- When you change language the app asks to restart and opens the Settings again by itself.
 
 ## 0.4.0 — 23/11/2026 (scegli le tue icone)
 - **Scegli le icone**: in Impostazioni → Aspetto → Icone ci sono 3 disegni per cuffie, controller, mouse e tastiera

@@ -161,6 +161,18 @@ namespace BatterieInBarra.Test
         }
 
         [Fact]
+        public void Si_puo_scegliere_la_lingua()
+        {
+            Testi.ImpostaLingua("de");
+            Assert.Equal("Akkus", Testi.T("batterie"));
+            Testi.ImpostaLingua("it");
+            Assert.Equal("Batterie", Testi.T("batterie"));
+            Testi.ImpostaLingua("en");
+            Assert.Equal("Batteries", Testi.T("batterie"));
+            Testi.ImpostaLingua("auto");   // torniamo a quella del PC
+        }
+
+        [Fact]
         public void Ogni_tipo_ha_3_disegni_diversi()
         {
             foreach (string tipo in Grafica.TIPI_PERSONALIZZABILI)

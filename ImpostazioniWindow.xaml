@@ -442,6 +442,26 @@
                 <!-- Generale -->
                 <Border Style="{StaticResource Riquadro}">
                     <StackPanel>
+                        <!-- Lingua -->
+                        <Grid Margin="0,11,0,11">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo lingua}" />
+                                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo lingua_sotto}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="{DynamicResource SfondoCampo}" CornerRadius="8" Padding="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="LinguaAuto" Tag="auto" GroupName="Lingua" Style="{StaticResource Scelta}" Content="{local:Testo lingua_auto}" Click="QuandoCambiaLingua" />
+                                    <RadioButton x:Name="LinguaIt" Tag="it" GroupName="Lingua" Style="{StaticResource Scelta}" Content="Italiano" Click="QuandoCambiaLingua" />
+                                    <RadioButton x:Name="LinguaEn" Tag="en" GroupName="Lingua" Style="{StaticResource Scelta}" Content="English" Click="QuandoCambiaLingua" />
+                                    <RadioButton x:Name="LinguaDe" Tag="de" GroupName="Lingua" Style="{StaticResource Scelta}" Content="Deutsch" Click="QuandoCambiaLingua" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <Border Style="{StaticResource Separatore}" />
                         <Grid Margin="0,11,0,11">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
