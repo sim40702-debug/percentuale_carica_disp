@@ -47,11 +47,13 @@ namespace BatterieInBarra
             {
                 AirPods.Ferma();
 
-                // Controller PlayStation col cavo (non sono Bluetooth)
-                await AggiungiPlayStation(collegati, lista, new List<string>());
+                // Controller PlayStation col cavo e controller Xbox con la chiavetta (non sono Bluetooth)
+                List<string> visti = new List<string>();
+                await AggiungiPlayStation(collegati, lista, visti);
+                AggiungiControllerXbox(lista, visti);
 
                 // Nessun collegato trovato: proviamo comunque la riserva, ma solo ogni 10 minuti
-                await AggiungiDaRiserva(collegati, lista, new List<string>());
+                await AggiungiDaRiserva(collegati, lista, visti);
                 return lista;
             }
 
@@ -88,6 +90,12 @@ namespace BatterieInBarra
 
             // 3. Controller PlayStation: Windows non sa la batteria, la leggiamo dai dati del controller
             await AggiungiPlayStation(collegati, lista, nomiVisti);
+
+            // 3b. Controller Xbox: li chiediamo alle funzioni di Windows per i giochi
+            AggiungiControllerXbox(lista, nomiVisti);
+
+            // 3c. Dispositivi "Low Energy" con il servizio batteria standard (mouse, tastiere, cuffie...)
+            await AggiungiDaBLE(collegati, lista, nomiVisti);
 
             // 4. Riserva: se un dispositivo collegato non ha ancora la batteria, proviamo il metodo
             //    della prima versione (PowerShell). Su alcuni PC trova dispositivi che l'altro non vede.
@@ -140,8 +148,7 @@ ConvertTo-Json -InputObject $lista -Compress
             bool mancaQualcuno = collegati.Count == 0;
             foreach (string nome in collegati.Values)
             {
-                string n = nome.ToLower();
-                if (!nomiVisti.Contains(nome) && !n.Contains("airpods") && !n.Contains("beats"))
+                if (!nomiVisti.Contains(nome) && !EApple(nome))
                 {
                     mancaQualcuno = true;
                 }
@@ -260,15 +267,52 @@ ConvertTo-Json -InputObject $lista -Compress
             }
         }
 
+        static void AggiungiControllerXbox(List<Dispositivo> lista, List<string> nomiVisti)
+        {
+            foreach (Dispositivo d in ControllerXbox.Leggi())
+            {
+                if (!nomiVisti.Contains(d.Nome))
+                {
+                    nomiVisti.Add(d.Nome);
+                    lista.Add(d);
+                }
+            }
+        }
+
+        // Per ogni dispositivo collegato che non ha ancora la batteria, proviamo il servizio batteria standard
+        static async Task AggiungiDaBLE(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
+        {
+            foreach (KeyValuePair<string, string> coppia in collegati)
+            {
+                string nome = coppia.Value;
+                if (nomiVisti.Contains(nome) || EApple(nome))
+                {
+                    continue;
+                }
+
+                int batteria = await BatteriaBLE.Leggi(coppia.Key);
+                if (batteria >= 0)
+                {
+                    nomiVisti.Add(nome);
+                    lista.Add(new Dispositivo { Nome = nome, Batteria = batteria });
+                }
+            }
+        }
+
+        // AirPods o cuffie Beats? (la loro batteria arriva in un altro modo)
+        public static bool EApple(string nome)
+        {
+            string n = nome.ToLower();
+            return n.Contains("airpod") || n.Contains("beats");
+        }
+
         static void AggiungiAirPods(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
         {
             bool ciSonoAirPods = false;
 
             foreach (string nome in collegati.Values)
             {
-                string n = nome.ToLower();
-                bool eApple = n.Contains("airpods") || n.Contains("beats");
-                if (!eApple || nomiVisti.Contains(nome))
+                if (!EApple(nome) || nomiVisti.Contains(nome))
                 {
                     continue;
                 }
@@ -447,14 +491,32 @@ ConvertTo-Json -InputObject $lista -Compress
             }
 
             testo.AppendLine();
+            testo.AppendLine("== AirPods e Beats ==");
+            testo.AppendLine(AirPods.Stato());
             LetturaAirPods airpods = AirPods.Ultima();
             if (airpods != null)
             {
-                testo.AppendLine("AirPods: auricolari=" + airpods.Auricolari + "% custodia=" + airpods.Custodia + "% segnale=" + airpods.Segnale);
+                testo.AppendLine("Ultima lettura: auricolari=" + airpods.Auricolari + "% custodia=" + airpods.Custodia + "% segnale=" + airpods.Segnale);
             }
             else
             {
-                testo.AppendLine("AirPods: nessun messaggio ricevuto");
+                testo.AppendLine("Ultima lettura: nessuna");
+            }
+
+            testo.AppendLine();
+            testo.AppendLine("== Servizio batteria Low Energy ==");
+            testo.AppendLine(BatteriaBLE.Riassunto());
+
+            testo.AppendLine();
+            testo.AppendLine("== Controller Xbox e altri ==");
+            List<Dispositivo> giochi = ControllerXbox.Leggi();
+            if (giochi.Count == 0)
+            {
+                testo.AppendLine("(nessuno)");
+            }
+            foreach (Dispositivo g in giochi)
+            {
+                testo.AppendLine("- " + g.Nome + " | batteria=" + g.Batteria + " | in carica=" + g.InCarica);
             }
 
             StatoBatteriaPC pc = BatteriaPC.Leggi();

@@ -91,6 +91,10 @@ namespace BatterieInBarra
             "M4.5 14 H5.5 A1.5 1.5 0 0 1 7 15.5 V19.5 A1.5 1.5 0 0 1 5.5 21 H4.5 A1.5 1.5 0 0 1 3 19.5 V15.5 A1.5 1.5 0 0 1 4.5 14 Z " +
             "M18.5 14 H19.5 A1.5 1.5 0 0 1 21 15.5 V19.5 A1.5 1.5 0 0 1 19.5 21 H18.5 A1.5 1.5 0 0 1 17 19.5 V15.5 A1.5 1.5 0 0 1 18.5 14 Z";
 
+        // Due auricolari (AirPods, Galaxy Buds...): la "testa" tonda e il gambo
+        const string AURICOLARI = "M7 3 A3.5 3.5 0 1 1 7 10 A3.5 3.5 0 0 1 7 3 Z M9.5 9 V20 " +
+            "M17 3 A3.5 3.5 0 1 0 17 10 A3.5 3.5 0 0 0 17 3 Z M14.5 9 V20";
+
         const string TASTIERA = "M4.5 6 H19.5 A2.5 2.5 0 0 1 22 8.5 V15.5 A2.5 2.5 0 0 1 19.5 18 H4.5 A2.5 2.5 0 0 1 2 15.5 V8.5 A2.5 2.5 0 0 1 4.5 6 Z " +
             "M6 10 H6.01 M10 10 H10.01 M14 10 H14.01 M18 10 H18.01 M7 14 H17";
 
@@ -115,11 +119,13 @@ namespace BatterieInBarra
             }
             string n = nome.ToLower();
 
-            string[] cuffie = { "cuffie", "head", "buds", "airpods", "earbuds", "wh-", "wf-", "jbl", "bose", "beats", "auricolari" };
+            string[] auricolari = { "airpod", "buds", "auricolari", "wf-", "pods" };
+            string[] cuffie = { "cuffie", "head", "wh-", "jbl", "bose", "beats" };
             string[] tastiera = { "keyboard", "tastiera", "keys", "k380", "k780" };
             string[] mouse = { "mouse", "mx master", "mx anywhere" };
             string[] controller = { "controller", "gamepad", "xbox", "dualsense", "dualshock", "joy-con" };
 
+            if (Contiene(n, auricolari)) return "auricolari";
             if (Contiene(n, cuffie)) return "cuffie";
             if (Contiene(n, tastiera)) return "tastiera";
             if (Contiene(n, mouse)) return "mouse";
@@ -145,6 +151,7 @@ namespace BatterieInBarra
             string disegno = BLUETOOTH;
             switch (TipoDispositivo(nome))
             {
+                case "auricolari": disegno = AURICOLARI; break;
                 case "cuffie": disegno = CUFFIE; break;
                 case "tastiera": disegno = TASTIERA; break;
                 case "mouse": disegno = MOUSE; break;

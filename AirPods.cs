@@ -26,29 +26,44 @@ namespace BatterieInBarra
     public static class AirPods
     {
         const ushort CODICE_APPLE = 0x004C;
-        const short SEGNALE_MINIMO = -70;     // più debole di così = AirPods di qualcun altro, lontane
-        const long VALIDITA = 90 * 1000;      // una lettura vale 90 secondi
+        const short SEGNALE_MINIMO = -90;     // più debole di così = troppo lontane (con -70 a volte scartavamo anche le tue)
+        const long VALIDITA = 5 * 60 * 1000;  // una lettura vale 5 minuti (le AirPods nelle orecchie mandano meno messaggi)
 
         static BluetoothLEAdvertisementWatcher ascolto = null;
         static LetturaAirPods ultima = null;
         static readonly object lucchetto = new object();   // i messaggi arrivano da un altro "thread"
+
+        // Contatori per le Informazioni per il supporto
+        static int messaggiApple = 0;       // messaggi di Apple ricevuti
+        static int messaggiAirPods = 0;     // di questi, quanti avevano la batteria delle AirPods
+        static int scartatiDeboli = 0;      // scartati perché il segnale era troppo debole
+        static short segnaleMigliore = -127;
 
         // Inizia ad ascoltare (solo quando ci sono AirPods collegate, così non usa CPU per niente)
         public static void Avvia()
         {
             if (ascolto != null)
             {
-                return;
+                // Se Windows ha fermato l'ascolto (Bluetooth spento e riacceso, PC in sospensione...) lo ripartiamo
+                bool fermo = ascolto.Status == BluetoothLEAdvertisementWatcherStatus.Aborted
+                          || ascolto.Status == BluetoothLEAdvertisementWatcherStatus.Stopped;
+                if (!fermo)
+                {
+                    return;
+                }
+                Registro.Scrivi("AirPods: l'ascolto si era fermato (" + ascolto.Status + "), lo riavvio");
+                Ferma();
             }
             try
             {
                 ascolto = new BluetoothLEAdvertisementWatcher();
-                ascolto.ScanningMode = BluetoothLEScanningMode.Passive;
+                ascolto.ScanningMode = BluetoothLEScanningMode.Active;   // con "Active" alcuni PC ricevono più messaggi
                 ascolto.Received += QuandoArrivaMessaggio;
                 ascolto.Start();
             }
-            catch (Exception)
+            catch (Exception errore)
             {
+                Registro.Scrivi("AirPods: impossibile ascoltare il Bluetooth: " + errore.Message);
                 ascolto = null;   // Bluetooth spento o non disponibile
             }
         }
@@ -61,6 +76,7 @@ namespace BatterieInBarra
             }
             try
             {
+                ascolto.Received -= QuandoArrivaMessaggio;
                 ascolto.Stop();
             }
             catch (Exception)
@@ -79,6 +95,17 @@ namespace BatterieInBarra
                     return ultima;
                 }
                 return null;
+            }
+        }
+
+        // Com'è andato l'ascolto (per le Informazioni per il supporto)
+        public static string Stato()
+        {
+            lock (lucchetto)
+            {
+                string stato = ascolto == null ? "spento" : ascolto.Status.ToString();
+                return "Ascolto: " + stato + " | messaggi Apple: " + messaggiApple + " | con batteria AirPods: " + messaggiAirPods
+                    + " | scartati (segnale debole): " + scartatiDeboli + " | segnale migliore: " + segnaleMigliore + " dBm";
             }
         }
 
@@ -122,10 +149,7 @@ namespace BatterieInBarra
 
         static void QuandoArrivaMessaggio(BluetoothLEAdvertisementWatcher chi, BluetoothLEAdvertisementReceivedEventArgs messaggio)
         {
-            if (messaggio.RawSignalStrengthInDBm < SEGNALE_MINIMO)
-            {
-                return;
-            }
+            short segnale = messaggio.RawSignalStrengthInDBm;
 
             foreach (BluetoothLEManufacturerData dati in messaggio.Advertisement.ManufacturerData)
             {
@@ -137,14 +161,26 @@ namespace BatterieInBarra
                 byte[] b = new byte[dati.Data.Length];
                 DataReader.FromBuffer(dati.Data).ReadBytes(b);
 
-                LetturaAirPods nuova = LeggiMessaggio(b, messaggio.RawSignalStrengthInDBm);
-                if (nuova == null)
-                {
-                    continue;
-                }
+                LetturaAirPods nuova = LeggiMessaggio(b, segnale);
 
                 lock (lucchetto)
                 {
+                    messaggiApple = messaggiApple + 1;
+                    if (nuova == null)
+                    {
+                        continue;
+                    }
+                    messaggiAirPods = messaggiAirPods + 1;
+                    if (segnale > segnaleMigliore)
+                    {
+                        segnaleMigliore = segnale;
+                    }
+                    if (segnale < SEGNALE_MINIMO)
+                    {
+                        scartatiDeboli = scartatiDeboli + 1;
+                        continue;
+                    }
+
                     // Se ci sono più AirPods vicine, teniamo quelle col segnale più forte (le tue)
                     bool vecchia = ultima == null || nuova.Quando - ultima.Quando > 15000;
                     if (vecchia || nuova.Segnale >= ultima.Segnale - 5)

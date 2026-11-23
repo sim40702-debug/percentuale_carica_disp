@@ -95,6 +95,9 @@ namespace BatterieInBarra
 
             // Windows si spegne o fai "Esci" dall'account: ci fermiamo subito e in silenzio
             SessionEnding += QuandoWindowsSiSpegne;
+
+            // I controller Xbox: Windows li elenca solo se qualcuno "ascolta" fin dall'inizio
+            ControllerXbox.Prepara();
             Registro.Scrivi("Avvio versione " + Aggiornamenti.VersioneAttuale() + " " + string.Join(" ", e.Args));
 
             // Siamo appena stati aggiornati? (la versione vecchia ci avvia con "--aggiornato")

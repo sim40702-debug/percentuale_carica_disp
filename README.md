@@ -22,6 +22,17 @@ A sinistra il **widget** (clic sulle batterie), a destra il **menu del tasto des
 
 Le **impostazioni**, divise in Dispositivi, Aspetto, Avvisi e Generale.
 
+## Dispositivi che legge
+
+- **Cuffie, mouse, tastiere Bluetooth** che Windows conosce (quelli che hanno la batteria nelle Impostazioni di Windows)
+- **Dispositivi Bluetooth Low Energy** con il servizio batteria standard, anche se Windows non lo mostra
+- **AirPods e Beats** (dai messaggi Bluetooth di Apple)
+- **Controller PS4 e PS5** (Bluetooth e cavo) e **controller Xbox** (Bluetooth e chiavetta)
+- **La batteria del portatile** (se vuoi, dalle Impostazioni)
+
+Il fulmine giallo compare subito per controller, AirPods e portatile. Per gli altri dispositivi Windows non sa
+se sono in carica: l'app lo capisce quando vede la batteria salire.
+
 ## Come si usa
 
 1. Scarica `BatterieInBarra-Setup-x.y.z.exe` dalle **Releases** e installalo
@@ -31,12 +42,12 @@ Le **impostazioni**, divise in Dispositivi, Aspetto, Avvisi e Generale.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.8 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.9 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.3.8" && git push && git tag v0.3.8 && git push origin v0.3.8
+   git pull && git add . && git commit -m "Versione 0.3.9" && git push && git tag v0.3.9 && git push origin v0.3.9
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.8" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.9" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.
@@ -55,6 +66,8 @@ L'app installata cerca da sola le versioni nuove nelle Releases di questo reposi
 - `Testi.cs` - tutte le scritte in italiano, inglese e tedesco
 - `AirPods.cs` - legge la batteria di AirPods e Beats dai messaggi Bluetooth di Apple
 - `PlayStation.cs` - legge la batteria dei controller PS4 e PS5 dai loro dati
+- `ControllerXbox.cs` - legge la batteria dei controller Xbox (funzioni di Windows per i giochi)
+- `BatteriaBLE.cs` - legge il servizio batteria standard dei dispositivi Bluetooth Low Energy
 - `docs/immagini/` - le foto di questa pagina e delle release
 - `Risorse/` - l'icona dell'app (`icona.ico` per Windows, `icona.png` per le notifiche e questa pagina)
 - `Avvisi.cs` - le notifiche di Windows

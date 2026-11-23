@@ -113,5 +113,31 @@ namespace BatterieInBarra.Test
             Assert.Contains("0.2.7", Testi.T("versione", "0.2.7"));
             Assert.Contains("85", Testi.T("avviso_scarica_testo", "Cuffie", 85));
         }
+
+        [Fact]
+        public void Percentuale_dei_controller_Xbox()
+        {
+            Assert.Equal(50, ControllerXbox.Percentuale(1000, 2000));
+            Assert.Equal(100, ControllerXbox.Percentuale(2100, 2000));   // mai sopra 100
+            Assert.Equal(-1, ControllerXbox.Percentuale(500, 0));        // numeri senza senso
+        }
+
+        [Fact]
+        public void Riconosce_AirPods_e_Beats_dal_nome()
+        {
+            Assert.True(Batterie.EApple("AirPods Pro di Luca"));
+            Assert.True(Batterie.EApple("Le AirPod di Marco"));
+            Assert.True(Batterie.EApple("Beats Studio Buds"));
+            Assert.False(Batterie.EApple("WH-1000XM5"));
+        }
+
+        [Fact]
+        public void Icona_giusta_per_auricolari_e_cuffie()
+        {
+            Assert.Equal("auricolari", Grafica.TipoDispositivo("AirPods Pro"));
+            Assert.Equal("auricolari", Grafica.TipoDispositivo("Galaxy Buds2"));
+            Assert.Equal("cuffie", Grafica.TipoDispositivo("WH-1000XM5"));
+            Assert.Equal("controller", Grafica.TipoDispositivo("Xbox Wireless Controller"));
+        }
     }
 }

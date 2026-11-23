@@ -1,7 +1,19 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.7).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.8).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.3.8 — 23/11/2026 (molti più dispositivi e AirPods sistemate)
+- **Molti più dispositivi Bluetooth**: adesso l'app legge anche il "servizio batteria" standard dei dispositivi
+  Bluetooth Low Energy (mouse, tastiere, cuffie, penne, smartwatch...) quando Windows non lo mostra.
+- **Controller Xbox** (Bluetooth o chiavetta): batteria e fulmine quando sono in carica.
+- **AirPods e Beats sistemate**: prima a volte non comparivano mai. L'app scartava i messaggi se il PC era un po'
+  lontano (segnale sotto -70), e se il Bluetooth veniva spento e riacceso (o il PC andava in sospensione) smetteva
+  di ascoltare. Adesso accetta segnali più deboli, riparte da sola e tiene la lettura per 5 minuti.
+- Le Informazioni per il supporto adesso dicono quanti messaggi delle AirPods arrivano, il segnale,
+  quali dispositivi hanno il servizio batteria e i controller Xbox trovati.
+- **Icona nuova per gli auricolari** (AirPods, Galaxy Buds...), diversa da quella delle cuffie.
+- Foto della pagina e delle release aggiornate.
 
 ## 0.3.7 — 20/11/2026 (fulmine più veloce)
 - **Il fulmine compare prima** per cuffie, mouse e tastiere: bastano 2 punti in più invece di 3.
