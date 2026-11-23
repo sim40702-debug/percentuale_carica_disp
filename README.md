@@ -42,12 +42,12 @@ se sono in carica: l'app lo capisce quando vede la batteria salire.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.9 — data (titolo)`
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.3.10 — data (titolo)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.3.9" && git push && git tag v0.3.9 && git push origin v0.3.9
+   git pull && git add . && git commit -m "Versione 0.3.10" && git push && git tag v0.3.10 && git push origin v0.3.10
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.9" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.3.10" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.

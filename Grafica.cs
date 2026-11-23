@@ -87,9 +87,10 @@ namespace BatterieInBarra
 
         // ----- Icone dei dispositivi (disegni a linee, 24x24) -----
 
-        const string CUFFIE = "M4 15 V12 A8 8 0 0 1 20 12 V15 " +
-            "M4.5 14 H5.5 A1.5 1.5 0 0 1 7 15.5 V19.5 A1.5 1.5 0 0 1 5.5 21 H4.5 A1.5 1.5 0 0 1 3 19.5 V15.5 A1.5 1.5 0 0 1 4.5 14 Z " +
-            "M18.5 14 H19.5 A1.5 1.5 0 0 1 21 15.5 V19.5 A1.5 1.5 0 0 1 19.5 21 H18.5 A1.5 1.5 0 0 1 17 19.5 V15.5 A1.5 1.5 0 0 1 18.5 14 Z";
+        // Cuffie con i padiglioni morbidi (la proposta B scelta da Simone)
+        const string CUFFIE = "M5 13 V11.5 A7 7 0 0 1 19 11.5 V13 " +
+            "M5 13 H6.5 A1.5 1.5 0 0 1 8 14.5 V19.5 A1.5 1.5 0 0 1 6.5 21 H5.5 A2.5 2.5 0 0 1 3 18.5 V15 A2 2 0 0 1 5 13 Z " +
+            "M19 13 H17.5 A1.5 1.5 0 0 0 16 14.5 V19.5 A1.5 1.5 0 0 0 17.5 21 H18.5 A2.5 2.5 0 0 0 21 18.5 V15 A2 2 0 0 0 19 13 Z";
 
         // Due auricolari (AirPods, Galaxy Buds...): la "testa" tonda e il gambo
         const string AURICOLARI = "M7 3 A3.5 3.5 0 1 1 7 10 A3.5 3.5 0 0 1 7 3 Z M9.5 9 V20 " +

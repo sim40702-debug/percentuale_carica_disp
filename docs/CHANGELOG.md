@@ -1,7 +1,10 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.8).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.3.9).
 La sezione della versione diventa la descrizione della release su GitHub.
+
+## 0.3.9 — 23/11/2026 (icona delle cuffie nuova)
+- **Icona delle cuffie rifatta**, con i padiglioni più morbidi: si vede meglio sulla barra e nel widget.
 
 ## 0.3.8 — 23/11/2026 (molti più dispositivi e AirPods sistemate)
 - **Molti più dispositivi Bluetooth**: adesso l'app legge anche il "servizio batteria" standard dei dispositivi
