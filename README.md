@@ -40,10 +40,11 @@ In **Generale → Lingua** scegli l'italiano, l'inglese o il tedesco, anche se W
 - **Cuffie, mouse, tastiere Bluetooth** che Windows conosce (quelli che hanno la batteria nelle Impostazioni di Windows)
 - **Dispositivi Bluetooth Low Energy** con il servizio batteria standard, anche se Windows non lo mostra
 - **AirPods e Beats** (dai messaggi Bluetooth di Apple)
+- **Mouse e tastiere Logitech** con la chiavetta Unifying, Bolt o Lightspeed (anche in carica)
 - **Controller PS4 e PS5** (Bluetooth e cavo) e **controller Xbox** (Bluetooth e chiavetta)
 - **La batteria del portatile** (se vuoi, dalle Impostazioni)
 
-Il fulmine giallo compare subito per controller, AirPods e portatile. Per gli altri dispositivi Windows non sa
+Il fulmine giallo compare subito per controller, Logitech, AirPods e portatile. Per gli altri dispositivi Windows non sa
 se sono in carica: l'app lo capisce quando vede la batteria salire.
 
 ## Come si usa
@@ -55,13 +56,13 @@ se sono in carica: l'app lo capisce quando vede la batteria salire.
 
 ## Come pubblicare una versione nuova
 
-1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.4.2 — data (titolo)`.
+1. Scrivi le novità in cima a `docs/CHANGELOG.md`, in una sezione `## 0.5.1 — data (titolo)`.
    Se vuoi una foto nella release, metti l'immagine in `docs/immagini` e scrivi nella sezione `![descrizione](immagini/nome.png)`
 2. Dal terminale:
    ```
-   git pull && git add . && git commit -m "Versione 0.4.2" && git push && git tag v0.4.2 && git push origin v0.4.2
+   git pull && git add . && git commit -m "Versione 0.5.1" && git push && git tag v0.5.1 && git push origin v0.5.1
    ```
-3. GitHub compila da solo e crea la release "Batterie in Barra 0.4.2" con l'exe
+3. GitHub compila da solo e crea la release "Batterie in Barra 0.5.1" con l'exe
 
 A ogni push GitHub controlla che il codice compili e fa partire i **test automatici**
 (Actions → "Controlla che compili"). I test stanno nella cartella `Test`.
@@ -81,6 +82,7 @@ L'app installata cerca da sola le versioni nuove nelle Releases di questo reposi
 - `AirPods.cs` - legge la batteria di AirPods e Beats dai messaggi Bluetooth di Apple
 - `PlayStation.cs` - legge la batteria dei controller PS4 e PS5 dai loro dati
 - `ControllerXbox.cs` - legge la batteria dei controller Xbox (funzioni di Windows per i giochi)
+- `Logitech.cs` - legge mouse e tastiere Logitech (chiavetta e Bluetooth) con il loro sistema HID++
 - `BatteriaBLE.cs` - legge il servizio batteria standard dei dispositivi Bluetooth Low Energy
 - `docs/immagini/` - le foto di questa pagina e delle release
 - `Risorse/` - l'icona dell'app (`icona.ico` per Windows, `icona.png` per le notifiche e questa pagina)

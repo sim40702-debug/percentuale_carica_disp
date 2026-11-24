@@ -215,6 +215,46 @@
                 <!-- Pagina: Dispositivi -->
                 <StackPanel x:Name="PaginaDispositivi">
                     <TextBlock Style="{StaticResource TitoloPagina}" Text="{local:Testo categoria_dispositivi}" />
+                <!-- Modi di leggere la batteria (si possono spegnere) -->
+                <Border Style="{StaticResource Riquadro}" Margin="0,0,0,14">
+                    <StackPanel>
+                        <Grid Margin="0,11,0,11">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo leggi_logitech}" />
+                                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo leggi_logitech_sotto}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="LeggiLogitech" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                        </Grid>
+                        <Border Style="{StaticResource Separatore}" />
+                        <Grid Margin="0,11,0,11">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo leggi_ble}" />
+                                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo leggi_ble_sotto}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="LeggiBLE" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                        </Grid>
+                        <Border Style="{StaticResource Separatore}" />
+                        <Grid Margin="0,11,0,11">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo leggi_airpods}" />
+                                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo leggi_airpods_sotto}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="LeggiAirPods" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
                 <!-- Dispositivi: nome, ordine e "sulla barra" (le righe le crea il codice) -->
                 <Border Style="{StaticResource Riquadro}">
                     <StackPanel x:Name="ListaDispositivi" />
@@ -363,6 +403,18 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo avviso_custodia_riga}" />
+                                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo avviso_custodia_sotto}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="AvvisoCustodia" Grid.Column="1" Style="{StaticResource Interruttore}" Margin="12,0,0,0" Click="QuandoCambiaInterruttore" />
+                        </Grid>
+                        <Border Style="{StaticResource Separatore}" />
+                        <Grid Margin="0,11,0,11">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
                                 <TextBlock Style="{StaticResource TitoloRiga}" Text="{local:Testo promemoria}" />
                                 <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo promemoria_sotto}" TextWrapping="Wrap" />
                             </StackPanel>
@@ -432,6 +484,13 @@
                             </Border>
                         </Grid>
                     </StackPanel>
+                </Border>
+
+                <!-- Soglia per ogni dispositivo (le righe le crea il codice) -->
+                <TextBlock Style="{StaticResource TitoloSezione}" Text="{local:Testo sezione_per_dispositivo}" />
+                <TextBlock Style="{StaticResource SottoRiga}" Text="{local:Testo per_dispositivo_sotto}" TextWrapping="Wrap" Margin="4,0,4,8" />
+                <Border Style="{StaticResource Riquadro}">
+                    <StackPanel x:Name="ListaSoglie" />
                 </Border>
 
                 </StackPanel>

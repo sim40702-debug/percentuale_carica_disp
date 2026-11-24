@@ -327,6 +327,11 @@ namespace BatterieInBarra
             Grafica.SogliaRosso = Opzioni.SogliaRosso;
             Grafica.TuttoBianco = Opzioni.TuttoBianco;
             Grafica.Scelte = Opzioni;   // per le icone scelte da te
+
+            // Modi di leggere la batteria accesi o spenti
+            Batterie.UsaLogitech = Opzioni.LeggiLogitech;
+            Batterie.UsaBLE = Opzioni.LeggiBLE;
+            Batterie.UsaAirPods = Opzioni.LeggiAirPods;
         }
 
 
@@ -354,6 +359,7 @@ namespace BatterieInBarra
                     RicordaDispositivo(d.Nome);
                     NuovaLettura(d.Nome, d.Batteria);
                     ControllaAvvisi(d.Nome, d.Batteria);
+                    ControllaCustodia(d);
                 }
 
                 // La batteria del PC (solo sui portatili)
@@ -557,13 +563,15 @@ namespace BatterieInBarra
             string nome = Opzioni.NomeDi(originale);
 
             // Batteria scarica (una volta sola, finché non torna sopra la soglia)
+            // La soglia può essere diversa per ogni dispositivo (0 = mai avvisare)
+            int soglia = Opzioni.SogliaDi(originale);
             bool avvisato = giaAvvisati.ContainsKey(originale) && giaAvvisati[originale];
-            if (percentuale <= Opzioni.Soglia && !avvisato)
+            if (soglia > 0 && percentuale <= soglia && !avvisato)
             {
                 MandaAvviso(Testi.T("avviso_scarica"), Testi.T("avviso_scarica_testo", nome, percentuale), originale, false);
                 giaAvvisati[originale] = true;
             }
-            if (percentuale > Opzioni.Soglia)
+            if (percentuale > soglia)
             {
                 giaAvvisati[originale] = false;
             }
@@ -574,6 +582,30 @@ namespace BatterieInBarra
                 MandaAvviso(Testi.T("avviso_completa"), Testi.T("avviso_completa_testo", nome), originale, false);
             }
             ultimiValori[originale] = percentuale;
+        }
+
+        // Custodia delle AirPods scarica (una volta sola, finché non torna sopra la soglia)
+        Dictionary<string, bool> custodiaAvvisata = new Dictionary<string, bool>();
+
+        void ControllaCustodia(Dispositivo d)
+        {
+            if (d.Custodia < 0)
+            {
+                return;   // non è un AirPods, o la custodia è chiusa/lontana
+            }
+            int soglia = Opzioni.SogliaDi(d.Nome);
+            bool avvisata = custodiaAvvisata.ContainsKey(d.Nome) && custodiaAvvisata[d.Nome];
+
+            if (Opzioni.AvvisoCustodia && soglia > 0 && d.Custodia <= soglia && !avvisata)
+            {
+                string nome = Opzioni.NomeDi(d.Nome);
+                MandaAvviso(Testi.T("avviso_custodia"), Testi.T("avviso_custodia_testo", nome, d.Custodia), d.Nome, false);
+                custodiaAvvisata[d.Nome] = true;
+            }
+            if (d.Custodia > soglia)
+            {
+                custodiaAvvisata[d.Nome] = false;
+            }
         }
 
         // Dopo ogni carica: la batteria si scarica molto più in fretta di prima?
@@ -898,6 +930,7 @@ namespace BatterieInBarra
         public void SogliaCambiata()
         {
             giaAvvisati.Clear();
+            custodiaAvvisata.Clear();
             ImpostazioniCambiate();
         }
 

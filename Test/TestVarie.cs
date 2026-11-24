@@ -173,6 +173,42 @@ namespace BatterieInBarra.Test
         }
 
         [Fact]
+        public void Soglia_per_ogni_dispositivo()
+        {
+            Impostazioni opzioni = new Impostazioni();
+            opzioni.Soglia = 20;
+            Assert.Equal(20, opzioni.SogliaDi("Cuffie"));      // non scelta: quella generale
+            opzioni.SoglieDispositivi["Mouse"] = 10;
+            opzioni.SoglieDispositivi["Tastiera"] = 0;          // mai avvisare
+            Assert.Equal(10, opzioni.SogliaDi("Mouse"));
+            Assert.Equal(0, opzioni.SogliaDi("Tastiera"));
+        }
+
+        [Fact]
+        public void Logitech_batteria_e_carica()
+        {
+            // Funzione 0x1004: la percentuale se c'è, altrimenti il livello
+            Assert.Equal(75, Logitech.PercentualeUnificata(75, 4));
+            Assert.Equal(50, Logitech.PercentualeUnificata(0, 4));
+            Assert.Equal(5, Logitech.PercentualeUnificata(0, 1));
+            Assert.True(Logitech.InCaricaUnificata(1));
+            Assert.False(Logitech.InCaricaUnificata(3));    // carica completa
+            Assert.False(Logitech.InCaricaUnificata(0));    // a batteria
+
+            // Funzione 0x1000
+            Assert.True(Logitech.InCaricaStato(4));
+            Assert.False(Logitech.InCaricaStato(0));
+
+            // Funzione 0x1001: dai volt (stima)
+            Assert.Equal(0, Logitech.DaVoltaggio(3300));
+            Assert.Equal(50, Logitech.DaVoltaggio(3800));
+            Assert.Equal(100, Logitech.DaVoltaggio(4200));
+
+            Assert.Equal("mouse", Logitech.TipoDa(3));
+            Assert.Equal("tastiera", Logitech.TipoDa(0));
+        }
+
+        [Fact]
         public void Ogni_tipo_ha_3_disegni_diversi()
         {
             foreach (string tipo in Grafica.TIPI_PERSONALIZZABILI)

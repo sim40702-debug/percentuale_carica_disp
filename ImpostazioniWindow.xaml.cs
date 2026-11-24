@@ -28,6 +28,10 @@ namespace BatterieInBarra
             MostraPercentuale.IsChecked = opzioni.MostraPercentuale;
             Animazioni.IsChecked = opzioni.Animazioni;
             AvvisoCompleta.IsChecked = opzioni.AvvisoCompleta;
+            AvvisoCustodia.IsChecked = opzioni.AvvisoCustodia;
+            LeggiLogitech.IsChecked = opzioni.LeggiLogitech;
+            LeggiBLE.IsChecked = opzioni.LeggiBLE;
+            LeggiAirPods.IsChecked = opzioni.LeggiAirPods;
             PromemoriaSerale.IsChecked = opzioni.PromemoriaSerale;
             AvvioWindows.IsChecked = opzioni.AvvioWindows;
             ControllaAggiornamenti.IsChecked = opzioni.ControllaAggiornamenti;
@@ -78,6 +82,7 @@ namespace BatterieInBarra
             Alle8.IsChecked = opzioni.SilenzioAlle == 8;
 
             MostraDispositivi();
+            MostraSoglie();
             MostraIcone();
             MostraAggiornamenti();
             MostraSpazio();
@@ -144,6 +149,107 @@ namespace BatterieInBarra
         Brush Colore(string nome)
         {
             return (Brush)Resources[nome];
+        }
+
+
+        // ----- Soglia per ogni dispositivo (pagina Avvisi) -----
+
+        // Le scelte di ogni riga: "Come gli altri" (-1), 10%, 20%, 30%, Mai (0)
+        static readonly int[] SCELTE_SOGLIA = { -1, 10, 20, 30, 0 };
+
+        void MostraSoglie()
+        {
+            ListaSoglie.Children.Clear();
+
+            if (opzioni.Visti.Count == 0)
+            {
+                TextBlock nessuno = new TextBlock();
+                nessuno.Text = Testi.T("nessun_dispositivo_ancora");
+                nessuno.Foreground = Colore("TestoGrigio");
+                nessuno.FontSize = 13;
+                nessuno.TextWrapping = TextWrapping.Wrap;
+                nessuno.Margin = new Thickness(0, 12, 0, 12);
+                ListaSoglie.Children.Add(nessuno);
+                return;
+            }
+
+            for (int i = 0; i < opzioni.Visti.Count; i++)
+            {
+                string originale = opzioni.Visti[i];
+                if (i > 0)
+                {
+                    Border linea = new Border();
+                    linea.Style = (Style)Resources["Separatore"];
+                    ListaSoglie.Children.Add(linea);
+                }
+
+                Grid riga = new Grid();
+                riga.Margin = new Thickness(0, 9, 0, 9);
+                riga.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                riga.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                TextBlock nome = new TextBlock();
+                nome.Style = (Style)Resources["TitoloRiga"];
+                nome.Text = opzioni.NomeDi(originale);
+                nome.VerticalAlignment = VerticalAlignment.Center;
+                nome.TextTrimming = TextTrimming.CharacterEllipsis;
+                riga.Children.Add(nome);
+
+                // Le 5 scelte, come i bottoni 10% / 20% / 30% qui sopra
+                Border sfondo = new Border();
+                sfondo.Background = Colore("SfondoCampo");
+                sfondo.CornerRadius = new CornerRadius(8);
+                sfondo.Padding = new Thickness(2);
+                sfondo.Margin = new Thickness(12, 0, 0, 0);
+                Grid.SetColumn(sfondo, 1);
+                StackPanel scelte = new StackPanel();
+                scelte.Orientation = Orientation.Horizontal;
+                sfondo.Child = scelte;
+
+                int attuale = opzioni.SoglieDispositivi.ContainsKey(originale) ? opzioni.SoglieDispositivi[originale] : -1;
+                foreach (int valore in SCELTE_SOGLIA)
+                {
+                    RadioButton scelta = new RadioButton();
+                    scelta.Style = (Style)Resources["Scelta"];
+                    scelta.GroupName = "Soglia_" + i;
+                    scelta.Tag = originale + "|" + valore;
+                    scelta.IsChecked = valore == attuale;
+                    if (valore == -1)
+                    {
+                        scelta.Content = Testi.T("soglia_come_altri");
+                    }
+                    else if (valore == 0)
+                    {
+                        scelta.Content = Testi.T("soglia_mai");
+                    }
+                    else
+                    {
+                        scelta.Content = valore + "%";
+                    }
+                    scelta.Click += QuandoCambiaSogliaDispositivo;
+                    scelte.Children.Add(scelta);
+                }
+                riga.Children.Add(sfondo);
+                ListaSoglie.Children.Add(riga);
+            }
+        }
+
+        void QuandoCambiaSogliaDispositivo(object sender, RoutedEventArgs e)
+        {
+            string tag = (string)((RadioButton)sender).Tag;
+            int divisore = tag.LastIndexOf('|');
+            string originale = tag.Substring(0, divisore);
+            int valore = int.Parse(tag.Substring(divisore + 1));
+
+            if (valore == -1)
+            {
+                opzioni.SoglieDispositivi.Remove(originale);   // torna a usare quella generale
+            }
+            else
+            {
+                opzioni.SoglieDispositivi[originale] = valore;
+            }
+            App.Corrente.SogliaCambiata();
         }
 
 
@@ -502,6 +608,7 @@ namespace BatterieInBarra
             {
                 App.Corrente.SpostaDispositivo(originale, direzione);
                 MostraDispositivi();
+                MostraSoglie();
             };
             return freccia;
         }
@@ -524,6 +631,7 @@ namespace BatterieInBarra
                 opzioni.Nomi[originale] = nome;
             }
             App.Corrente.ImpostazioniCambiate();
+            MostraSoglie();   // anche lì si vede il nome nuovo
         }
 
         // Invio = fine scrittura
@@ -561,6 +669,10 @@ namespace BatterieInBarra
             opzioni.MostraPercentuale = MostraPercentuale.IsChecked == true;
             opzioni.Animazioni = Animazioni.IsChecked == true;
             opzioni.AvvisoCompleta = AvvisoCompleta.IsChecked == true;
+            opzioni.AvvisoCustodia = AvvisoCustodia.IsChecked == true;
+            opzioni.LeggiLogitech = LeggiLogitech.IsChecked == true;
+            opzioni.LeggiBLE = LeggiBLE.IsChecked == true;
+            opzioni.LeggiAirPods = LeggiAirPods.IsChecked == true;
             opzioni.PromemoriaSerale = PromemoriaSerale.IsChecked == true;
             opzioni.AvvioWindows = AvvioWindows.IsChecked == true;
             opzioni.ControllaAggiornamenti = ControllaAggiornamenti.IsChecked == true;

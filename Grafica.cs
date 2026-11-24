@@ -2,6 +2,7 @@
 // Cose usate da tutte le finestre: colori, tema chiaro/scuro, icone e mini batterie.
 
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -113,11 +114,18 @@ namespace BatterieInBarra
         public const string NOME_PC = "__pc__";
 
         // Indovina il tipo di dispositivo dal nome
+        // Tipi che conosciamo già da altre parti (es. Logitech ci dice se è un mouse o una tastiera)
+        public static Dictionary<string, string> TipiNoti = new Dictionary<string, string>();
+
         public static string TipoDispositivo(string nome)
         {
             if (nome == NOME_PC)
             {
                 return "portatile";
+            }
+            if (TipiNoti.ContainsKey(nome))
+            {
+                return TipiNoti[nome];
             }
             string n = nome.ToLower();
 

@@ -23,10 +23,16 @@ namespace BatterieInBarra
         public int Batteria;     // percentuale (0-100)
         public bool SaSeCarica;  // il dispositivo ci dice se è in carica? (controller PlayStation e AirPods sì)
         public bool InCarica;    // si sta caricando (vale solo se SaSeCarica è true)
+        public int Custodia = -1; // AirPods: batteria della custodia (-1 = non si sa)
     }
 
     public static class Batterie
     {
+        // Quali modi di lettura usare (li mette App dalle Impostazioni)
+        public static bool UsaLogitech = true;
+        public static bool UsaBLE = true;
+        public static bool UsaAirPods = true;
+
         // I "codici" con cui Windows salva le informazioni dei dispositivi
         const string CHIAVE_COLLEGATO = "{83DA6326-97A6-4088-9453-A1923F573B29} 15";
         const string CHIAVE_BATTERIA = "{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2";
@@ -51,6 +57,7 @@ namespace BatterieInBarra
                 List<string> visti = new List<string>();
                 await AggiungiPlayStation(collegati, lista, visti);
                 AggiungiControllerXbox(lista, visti);
+                AggiungiLogitech(lista, visti);
 
                 // Nessun collegato trovato: proviamo comunque la riserva, ma solo ogni 10 minuti
                 await AggiungiDaRiserva(collegati, lista, visti);
@@ -94,8 +101,14 @@ namespace BatterieInBarra
             // 3b. Controller Xbox: li chiediamo alle funzioni di Windows per i giochi
             AggiungiControllerXbox(lista, nomiVisti);
 
-            // 3c. Dispositivi "Low Energy" con il servizio batteria standard (mouse, tastiere, cuffie...)
-            await AggiungiDaBLE(collegati, lista, nomiVisti);
+            // 3c. Mouse e tastiere Logitech (chiavetta o Bluetooth)
+            AggiungiLogitech(lista, nomiVisti);
+
+            // 3d. Dispositivi "Low Energy" con il servizio batteria standard (mouse, tastiere, cuffie...)
+            if (UsaBLE)
+            {
+                await AggiungiDaBLE(collegati, lista, nomiVisti);
+            }
 
             // 4. Riserva: se un dispositivo collegato non ha ancora la batteria, proviamo il metodo
             //    della prima versione (PowerShell). Su alcuni PC trova dispositivi che l'altro non vede.
@@ -279,6 +292,27 @@ ConvertTo-Json -InputObject $lista -Compress
             }
         }
 
+        static void AggiungiLogitech(List<Dispositivo> lista, List<string> nomiVisti)
+        {
+            if (!UsaLogitech)
+            {
+                return;
+            }
+            foreach (LogitechTrovato t in Logitech.Leggi())
+            {
+                if (nomiVisti.Contains(t.Nome))
+                {
+                    continue;
+                }
+                if (t.Tipo != "")
+                {
+                    Grafica.TipiNoti[t.Nome] = t.Tipo;   // così l'icona è giusta anche se il nome non dice "mouse"
+                }
+                nomiVisti.Add(t.Nome);
+                lista.Add(new Dispositivo { Nome = t.Nome, Batteria = t.Batteria, SaSeCarica = true, InCarica = t.InCarica });
+            }
+        }
+
         // Per ogni dispositivo collegato che non ha ancora la batteria, proviamo il servizio batteria standard
         static async Task AggiungiDaBLE(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
         {
@@ -308,6 +342,12 @@ ConvertTo-Json -InputObject $lista -Compress
 
         static void AggiungiAirPods(Dictionary<string, string> collegati, List<Dispositivo> lista, List<string> nomiVisti)
         {
+            if (!UsaAirPods)
+            {
+                AirPods.Ferma();   // spento nelle Impostazioni: non ascoltiamo nemmeno
+                return;
+            }
+
             bool ciSonoAirPods = false;
 
             foreach (string nome in collegati.Values)
@@ -322,7 +362,7 @@ ConvertTo-Json -InputObject $lista -Compress
                 if (lettura != null)
                 {
                     nomiVisti.Add(nome);
-                    lista.Add(new Dispositivo { Nome = nome, Batteria = lettura.Auricolari, SaSeCarica = true, InCarica = lettura.InCarica });
+                    lista.Add(new Dispositivo { Nome = nome, Batteria = lettura.Auricolari, SaSeCarica = true, InCarica = lettura.InCarica, Custodia = lettura.Custodia });
                 }
             }
 
@@ -506,6 +546,10 @@ ConvertTo-Json -InputObject $lista -Compress
             testo.AppendLine();
             testo.AppendLine("== Servizio batteria Low Energy ==");
             testo.AppendLine(BatteriaBLE.Riassunto());
+
+            testo.AppendLine();
+            testo.AppendLine("== Logitech ==");
+            testo.AppendLine(Logitech.Riassunto());
 
             testo.AppendLine();
             testo.AppendLine("== Controller Xbox e altri ==");

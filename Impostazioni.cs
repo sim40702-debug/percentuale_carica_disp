@@ -50,6 +50,28 @@ namespace BatterieInBarra
         // Scorciatoia da tastiera Ctrl + Alt + B per aprire il widget
         public bool Scorciatoia { get; set; } = true;
 
+        // Modi di leggere la batteria (si possono spegnere nella pagina Dispositivi)
+        public bool LeggiLogitech { get; set; } = true;   // mouse e tastiere Logitech (chiavetta e Bluetooth)
+        public bool LeggiBLE { get; set; } = true;        // servizio batteria dei dispositivi Bluetooth Low Energy
+        public bool LeggiAirPods { get; set; } = true;    // AirPods e Beats
+
+        // Avviso quando la custodia delle AirPods è scarica
+        public bool AvvisoCustodia { get; set; } = true;
+
+        // Soglia di "batteria bassa" di un dispositivo: nome -> 10, 20, 30 oppure 0 (= mai avvisare).
+        // Se un dispositivo non c'è, usa la soglia generale (Soglia)
+        public Dictionary<string, int> SoglieDispositivi { get; set; } = new Dictionary<string, int>();
+
+        // La soglia da usare per un dispositivo (0 = nessun avviso)
+        public int SogliaDi(string originale)
+        {
+            if (SoglieDispositivi != null && SoglieDispositivi.ContainsKey(originale))
+            {
+                return SoglieDispositivi[originale];
+            }
+            return Soglia;
+        }
+
         // Lingua dell'app: "auto" (quella di Windows), "it", "en" o "de"
         public string Lingua { get; set; } = "auto";
 

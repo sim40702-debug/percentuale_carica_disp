@@ -1,9 +1,31 @@
 # CHANGELOG — Batterie in Barra
 
-Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.4.1).
+Formato delle versioni: MAGGIORE.MINORE.CORREZIONE (la versione viene dal tag, es. v0.5.0).
 La sezione della versione diventa la descrizione della release su GitHub.
 Per mettere una foto nella release scrivi nella sezione `![descrizione](immagini/nome.png)` (le foto stanno in `docs/immagini`):
 nella release compaiono solo le foto scritte lì.
+
+## 0.5.0 — 24/11/2026 (Logitech e avvisi per ogni dispositivo)
+- **Mouse e tastiere Logitech**: con la chiavetta Unifying, Bolt o Lightspeed (e in Bluetooth) adesso l'app legge
+  la batteria e sa se sono in carica, quindi il fulmine compare subito. Riconosce anche se è un mouse o una tastiera.
+- **Avviso per ogni dispositivo**: in Avvisi → Per ogni dispositivo scegli sotto che percentuale avvisarti
+  (10, 20, 30%), "Come gli altri" oppure "Mai".
+- **Custodia AirPods scarica**: un avviso nuovo quando la custodia scende sotto la soglia.
+- **Tutto si può spegnere**: in Dispositivi ci sono gli interruttori per Logitech, servizio batteria Bluetooth e AirPods;
+  in Avvisi quello per la custodia.
+
+![Dispositivi](immagini/dispositivi.png)
+
+![Avvisi](immagini/avvisi.png)
+
+**English**
+- **Logitech mice and keyboards**: with the Unifying, Bolt or Lightspeed receiver (and over Bluetooth) the app now reads
+  the battery and knows when they are charging, so the bolt shows up right away.
+- **Warning for each device**: in Notifications → For each device choose below which percentage to warn you
+  (10, 20, 30%), "Like the others" or "Never".
+- **AirPods case low**: a new warning when the case drops below the threshold.
+- **Everything can be turned off**: switches for Logitech, Bluetooth battery service and AirPods in Devices,
+  and for the case warning in Notifications.
 
 ## 0.4.1 — 23/11/2026 (scegli la lingua)
 - **Scegli la lingua dell'app**: in Impostazioni → Generale → Lingua puoi mettere Italiano, English o Deutsch,
